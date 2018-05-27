@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WT_WebMVCApp.Services;
 
 namespace WT_WebMVCApp
 {
@@ -21,6 +23,12 @@ namespace WT_WebMVCApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            //maybe this has to be Signleton aslo ?/
+            services.AddScoped<IWorkoutTrackerHttpClient, WorkoutTrackerHttpClient>();
+
+            services.AddScoped<IWorkoutTrackerService, WorkoutTrackerService>();
+
             services.AddMvc();
         }
 
@@ -43,7 +51,7 @@ namespace WT_WebMVCApp
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=WorkoutSession}/{action=Index}/{id?}");
             });
         }
     }

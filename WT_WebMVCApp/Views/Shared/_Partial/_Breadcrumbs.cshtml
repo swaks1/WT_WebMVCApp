@@ -1,7 +1,13 @@
-﻿<!-- Breadcrumbs-->
+﻿@{
+    var controllerName = ViewContext.RouteData.Values["controller"].ToString();
+    var actionName = ViewContext.RouteData.Values["action"].ToString();
+}
+
+
+<!-- Breadcrumbs-->
 <ol class="breadcrumb">
     <li class="breadcrumb-item">
-        <a href="#">Dashboard</a>
-    </li>
-    <li class="breadcrumb-item active">My Dashboard</li>
+        <a asp-area="" asp-controller="@controllerName" asp-action="@actionName">@controllerName</a>
+</li>
+    <li class="breadcrumb-item active">@actionName</li>
 </ol>

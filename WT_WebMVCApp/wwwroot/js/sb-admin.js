@@ -5,7 +5,7 @@
     template: '<div class="tooltip navbar-sidenav-tooltip" role="tooltip" style="pointer-events: none;"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
   })
   // Toggle the side navigation
-  $("#sidenavToggler").click(function(e) {
+    $("#sidenavToggler").click(function (e) {
     e.preventDefault();
     $("body").toggleClass("sidenav-toggled");
     $(".navbar-sidenav .nav-link-collapse").addClass("collapsed");

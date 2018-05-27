@@ -1,6 +1,10 @@
-﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+﻿@{
+    var controllerName = ViewContext.RouteData.Values["controller"].ToString();
+}
 
-    <a asp-area="" asp-controller="Home" asp-action="Index" class="navbar-brand">Workout Tracker</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+
+    <a asp-area="" asp-controller="WorkoutSession" asp-action="Index" class="navbar-brand">Workout Tracker</a>
 
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -9,10 +13,10 @@
     <div class="collapse navbar-collapse" id="navbarResponsive">
         <!--LEFT ACCORDION MENU-->
         <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
-            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Dashboard">
-                <a class="nav-link" href="index.html">
-                    <i class="fa fa-fw fa-dashboard"></i>
-                    <span class="nav-link-text">Dashboard</span>
+            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Workout Session" id="item-WorkoutSession">
+                <a asp-area="" asp-controller="WorkoutSession" asp-action="Index" class="nav-link">
+                    <img src="~/icons/barbell-24.png" />
+                    <span class="nav-link-text">Workout Session</span>
                 </a>
             </li>
             <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Components">
@@ -31,7 +35,6 @@
             </li>
         </ul>
         <!--/.LEFT ACCORDION MENU-->
-
         <!--Button for toggle of ACCORDION (small or big)-->
         <ul class="navbar-nav sidenav-toggler">
             <li class="nav-item">
@@ -41,7 +44,6 @@
             </li>
         </ul>
         <!--/.Button for toggle of ACCORDION (small or big)-->
-
         <!--Right NAV items (Messages notification User settings)-->
         <ul class="navbar-nav ml-auto">
             <li class="nav-item dropdown">
@@ -148,3 +150,18 @@
 
     </div>
 </nav>
+
+
+<script>
+    $(function () {
+        var controllerName = '@controllerName';
+        $("#exampleAccordion").children("li").each(function (index, item) {
+            $(item).removeClass("active");
+        });
+
+        var selectedItem = "item-" + controllerName
+        $("#" + selectedItem).addClass("active");
+    });
+
+</script>
+

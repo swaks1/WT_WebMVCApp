@@ -17,28 +17,9 @@ namespace WT_WebMVCApp.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
-        {
-            _logger.LogInformation("GETTTTTTT page says hello");
-            return View();
-        }
-
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
         public IActionResult Error()
         {
+            _logger.LogInformation("Error in APP");
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
