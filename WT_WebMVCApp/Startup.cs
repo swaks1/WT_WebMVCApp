@@ -51,7 +51,7 @@ namespace WT_WebMVCApp
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=WorkoutSession}/{action=Index}/{id?}");
+                    template: "{controller=WorkoutExercise}/{action=Index}/{id?}");
             });
         }
     }

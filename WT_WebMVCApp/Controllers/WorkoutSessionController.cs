@@ -22,13 +22,9 @@ namespace WT_WebMVCApp.Controllers
             _workoutTrackerService = workoutTrackerService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var UserVM = new UserVM {ID = 1 };
-            var response = await _workoutTrackerService.GetExercisesForUser(UserVM);
-
-            return View(response.ViewModel);
-
+            return View();
         }
 
 

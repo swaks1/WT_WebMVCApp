@@ -1,0 +1,137 @@
+﻿<div class="modal fade" id="exerciseModal" tabindex="-1" role="dialog" aria-labelledby="exerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Exercise</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form">
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="Name" class="form-label mr-1">Name:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="Name" name="Name">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="Description" class="form-label mr-1">Description:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="Description" name="Description"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="Category" class="form-label mr-1">Category:</label>
+                        </div>
+                        <div class="col-md-6">
+                            @Html.DropDownList("Category", ViewData["Category"] as SelectList, " - ", new { @class = "form-control", @id = "Category" })
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="Image" class="form-label mr-1">Image:</label>
+                        </div>
+                        <div class="col-md-6 pr-0">
+                            <input type="file" class="form-control-file" id="Image" name="Image" accept="image/*" onchange="loadFile(event)">
+                        </div>
+                        <div class="col-md-3 pl-0">
+                            <img class="img-responsive rounded-circle" id="previewImage" alt="Image for Exercise" width="100" height="100" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3 mt-5">
+                        <div class="col-md-3 text-left">
+                            <label for="" class="form-label mr-1">Attributes:</label><br />
+                            <button type="button" class="btn btn-success btn-sm attrAddNew" data-toggle="tooltip" data-placement="top" title="Add New Attribute">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="col-md-8 pr-0" id="AttributeHolder">
+
+                            <div class="row mb-2 AttributeInstance">
+                                <div class="col-md-3 pt-0">
+                                    <span class="badge badge-pill badge-secondary"> AttrName </span>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control form-control-sm" id="AttrName1" name="AttributeName" readonly>
+                                </div>
+                                <div class="col-md-6 pt-0">
+                                    <button type="button" class="btn btn-warning btn-sm attrEdit" data-toggle="tooltip" data-placement="top" title="Edit Attribute">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm attrDelete" data-toggle="tooltip" data-placement="top" title="Delete Attribute">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2 AttributeInstance clonableRow" style="display:none">
+                                <div class="col-md-3 pt-0">
+                                    <span class="badge badge-pill badge-secondary"> AttrName </span>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control form-control-sm" id="AttrName1" name="AttributeName" readonly>
+                                </div>
+                                <div class="col-md-6 pt-0">
+                                    <button type="button" class="btn btn-warning btn-sm attrEdit" data-toggle="tooltip" data-placement="top" title="Edit Attribute">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm attrDelete" data-toggle="tooltip" data-placement="top" title="Delete Attribute">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save exercise</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var loadFile = function (event) {
+        $("#previewImage").attr("src", URL.createObjectURL(event.target.files[0]));
+        $("#previewImage").show();
+    };
+
+    $(function () {
+        $("#previewImage").hide();
+
+        $(".attrAddNew").click(function () {
+            $(this).tooltip('hide');
+
+            var clone = $(".clonableRow").clone();
+            $(clone).removeClass("clonableRow");
+            $(clone).show();
+            $(clone).appendTo("#AttributeHolder");
+        });
+
+        //this has to bi with .on("click") beacause are dynamicly added
+        $(document).on("click",".attrDelete", function () {
+            $(this).tooltip('hide');
+            var attributeInstance = $(this).closest('.AttributeInstance');
+
+            $(attributeInstance).hide('slow', function () { $(attributeInstance).remove(); })
+        });
+
+
+    })
+</script>

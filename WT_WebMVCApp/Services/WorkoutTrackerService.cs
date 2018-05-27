@@ -22,7 +22,7 @@ namespace WT_WebMVCApp.Services
         {
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.GetAsync("/api/Exercises/user/1");
+            var response = await httpClient.GetAsync($"/api/Exercises/user/{user.ID}");
 
             return await HandleApiResponse(response, async () =>
             {
