@@ -1,0 +1,21 @@
+{
+  "name": "WT_WebMVCApp",
+  "homepage": "https://github.com/swaks1/WT_WebMVCApp",
+  "authors": [
+    "Riste Poposki <rickyarpy@hotmail.com>"
+  ],
+  "description": "Workout Tracking Web Client App",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Font-Awesome": "5.0.13",
+    "jquery.unobtrusive-ajax": "^3.2.5"
+  }
+}

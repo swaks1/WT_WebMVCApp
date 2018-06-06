@@ -1,20 +1,24 @@
-﻿<div class="modal fade" id="exerciseModal" tabindex="-1" role="dialog" aria-labelledby="exerciseModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+﻿<!--This gets populated in WorkoutExercises-Index view -->
+
+
+<div class="modal fade" id="exerciseModal" tabindex="-1" role="dialog" aria-labelledby="exerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">        
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Exercise</h5>
+                <h5 class="modal-title" id="exerciseModalLabel">Exercise</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form class="form">
+            <div class="modal-body">                
+                <form id="exerciseForm">
                     <div class="row mb-3">
                         <div class="col-md-3 text-left">
                             <label for="Name" class="form-label mr-1">Name:</label>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="Name" name="Name">
+                            <input type="text" class="form-control" id="Name">
+                            <input type="hidden" id="ExerciseId">
                         </div>
                     </div>
 
@@ -23,7 +27,7 @@
                             <label for="Description" class="form-label mr-1">Description:</label>
                         </div>
                         <div class="col-md-6">
-                            <textarea class="form-control" id="Description" name="Description"></textarea>
+                            <textarea class="form-control" id="Description"></textarea>
                         </div>
                     </div>
 
@@ -49,57 +53,58 @@
                     </div>
 
                     <div class="row mb-3 mt-5">
-                        <div class="col-md-3 text-left">
+                        <div class="col-md-3">
                             <label for="" class="form-label mr-1">Attributes:</label><br />
                             <button type="button" class="btn btn-success btn-sm attrAddNew" data-toggle="tooltip" data-placement="top" title="Add New Attribute">
                                 <i class="fa fa-plus"></i>
                             </button>
                         </div>
-                        <div class="col-md-8 pr-0" id="AttributeHolder">
 
-                            <div class="row mb-2 AttributeInstance">
-                                <div class="col-md-3 pt-0">
-                                    <span class="badge badge-pill badge-secondary"> AttrName </span>
-                                </div>
-                                <div class="col-md-3">
-                                    <input type="text" class="form-control form-control-sm" id="AttrName1" name="AttributeName" readonly>
-                                </div>
-                                <div class="col-md-6 pt-0">
-                                    <button type="button" class="btn btn-warning btn-sm attrEdit" data-toggle="tooltip" data-placement="top" title="Edit Attribute">
-                                        <i class="fa fa-edit"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm attrDelete" data-toggle="tooltip" data-placement="top" title="Delete Attribute">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </div>
+                        <div class="col-md-8 pr-0">
+                            <div class="row">
+                                <div class="col-md-5 font-weight-bold text-center">Name</div>
+                                <div class="col-md-3 font-weight-bold text-center">Value</div>
+                                <div class="col-md-4 font-weight-bold text-center">Actions</div>
                             </div>
+                            <div class="row pt-2">
+                                <div class="col-md-12" id="AttributeHolder">
 
-                            <div class="row mb-2 AttributeInstance clonableRow" style="display:none">
-                                <div class="col-md-3 pt-0">
-                                    <span class="badge badge-pill badge-secondary"> AttrName </span>
                                 </div>
-                                <div class="col-md-3">
-                                    <input type="text" class="form-control form-control-sm" id="AttrName1" name="AttributeName" readonly>
-                                </div>
-                                <div class="col-md-6 pt-0">
-                                    <button type="button" class="btn btn-warning btn-sm attrEdit" data-toggle="tooltip" data-placement="top" title="Edit Attribute">
-                                        <i class="fa fa-edit"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm attrDelete" data-toggle="tooltip" data-placement="top" title="Delete Attribute">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </div>
+
                             </div>
-
-
                         </div>
+
+                        <!-- Just a template it is not shown yet-->
+                        <div class="row mb-2 clonableRow" style="display:none">
+                            <div class="col-md-5 pt-0 text-right">
+                                <input type="hidden" class="AttributeId" value="0">
+                                <span class="badge badge-pill badge-secondary AttributeNameSpan"></span>
+                                <input type="text" class="form-control form-control-sm AttributeNameInput" style="display:none">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control form-control-sm AttributeValue" readonly>
+                            </div>
+                            <div class="col-md-4 pt-0">
+                                <button type="button" class="btn btn-warning btn-sm attrEdit" data-toggle="tooltip" data-placement="top" title="Edit Attribute">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm attrSave" data-toggle="tooltip" data-placement="top" title="Save Attribute" style="display:none">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm attrDelete" data-toggle="tooltip" data-placement="top" title="Delete Attribute">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
 
                 </form>
             </div>
             <div class="modal-footer">
+                <div class="p-3 mb-2 bg-danger text-white" id="ErrorMessage" style="display:none"></div>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save exercise</button>
+                <button type="button" class="btn btn-primary" id="saveExerciseBtn">Save exercise</button>
             </div>
         </div>
     </div>
@@ -112,6 +117,7 @@
         $("#previewImage").show();
     };
 
+
     $(function () {
         $("#previewImage").hide();
 
@@ -120,18 +126,102 @@
 
             var clone = $(".clonableRow").clone();
             $(clone).removeClass("clonableRow");
+            $(clone).addClass("AttributeInstance");
+
+
+            $(clone).find(".AttributeNameSpan").hide();
+            $(clone).find(".AttributeNameInput").show();
+
+            $(clone).find(".AttributeValue").attr("readonly", false);
+
+            $(clone).find(".attrEdit").hide();
+            $(clone).find(".attrSave").show();
             $(clone).show();
             $(clone).appendTo("#AttributeHolder");
         });
 
-        //this has to bi with .on("click") beacause are dynamicly added
+        //this has to be with .on("click") beacause are dynamicly added
         $(document).on("click",".attrDelete", function () {
             $(this).tooltip('hide');
             var attributeInstance = $(this).closest('.AttributeInstance');
-
             $(attributeInstance).hide('slow', function () { $(attributeInstance).remove(); })
         });
 
+        $(document).on("click", ".attrEdit", function () {
+            $(this).tooltip('hide');
+            var attributeInstance = $(this).closest('.AttributeInstance');
 
+            $(attributeInstance).find(".AttributeNameSpan").hide();
+            $(attributeInstance).find(".AttributeNameInput").show();
+
+            $(attributeInstance).find(".AttributeValue").attr("readonly", false);
+
+            $(attributeInstance).find(".attrEdit").hide();
+            $(attributeInstance).find(".attrSave").show();
+        });
+
+        $(document).on("click", ".attrSave", function () {
+            $(this).tooltip('hide');
+            var attributeInstance = $(this).closest('.AttributeInstance');
+
+            var newAttrName = $(attributeInstance).find(".AttributeNameInput").val();
+            $(attributeInstance).find(".AttributeNameSpan").text(newAttrName).show();
+            $(attributeInstance).find(".AttributeNameInput").hide();
+
+            $(attributeInstance).find(".AttributeValue").attr("readonly", true);
+
+            $(attributeInstance).find(".attrEdit").show();
+            $(attributeInstance).find(".attrSave").hide();
+        });
+
+
+
+        $("#saveExerciseBtn").click(function () {
+            var url = '@Url.Action("SaveExercise", "WorkoutExercise")';
+            var data = new FormData();
+
+            var name = $("#Name").val();
+            var id = $("#ExerciseId").val();
+            var description = $("#Description").val();
+            var category = $("#Category").val();
+            var image = $("#Image").get(0).files[0];
+
+            var attributes = [];
+            var attributeInstances = $(".AttributeInstance");
+            $.each(attributeInstances, function (index,item) {
+
+                var attributeObject = {
+                    ID: $(item).find(".AttributeId").val(),
+                    AttributeName: $(item).find(".AttributeNameInput").val(),
+                    AttributeValue: $(item).find(".AttributeValue").val(),
+                }
+                attributes.push(attributeObject);
+            });
+
+            data.append("Name", name );
+            data.append("ID", id);
+            data.append("Description", description);
+            data.append("Category", category);
+            data.append("Image", image);
+            data.append("AttributesSerialized", JSON.stringify(attributes));
+
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                method: 'POST',
+                success: function (data) {
+                    ShowLoader("exerciseForm");
+                    window.location = '@Url.Action("Index", "WorkoutExercise")';
+                },
+                error: function (data) {
+                    $("#ErrorMessage").text(data).show();
+                    console.log(data);
+                }
+            });
+
+        })
     })
 </script>

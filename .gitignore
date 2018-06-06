@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /WT_WebMVCApp/LOGS
+/WT_WebMVCApp/bower_components/
+/WT_WebMVCApp/wwwroot/lib/

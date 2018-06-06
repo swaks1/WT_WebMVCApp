@@ -8,6 +8,8 @@ using WT_WebMVCApp.Services;
 using WT_WebMVCApp.Models;
 using WT_WebMVCApp.Helpers;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace WT_WebMVCApp.Controllers
 {
@@ -22,16 +24,40 @@ namespace WT_WebMVCApp.Controllers
             _workoutTrackerService = workoutTrackerService;
         }
 
-
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
             var response = await _workoutTrackerService.GetExercisesForUser(UserVM);
-            response.ViewModel.ForEach(item => item.ImagePath = "https://static2.fjcdn.com/comments/Heres+without+the+quote+_395729dda93f0ff281812ec84603e63a.jpg");
+            //set image path relative to api's URL ... 
+            response.ViewModel.ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
 
             ViewData["Category"] = GetCategorySelectList();
 
             return View(response.ViewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveExercise([FromForm] ExerciseVM exercise)
+        {
+            var attrs = JsonConvert.DeserializeObject<List<ExerciseAttributeVM>>(exercise.AttributesSerialized);
+            exercise.Attributes = attrs;
+            if (exercise.Image != null)
+            {
+                exercise.ImagePath = exercise.Image.FileName;
+                using (var fileStream = exercise.Image.OpenReadStream())
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        fileStream.CopyTo(ms);
+                        exercise.ImageBytes = ms.ToArray();
+                    }
+                }
+            }
+
+            var response = await _workoutTrackerService.SaveExerciseForUser(exercise);
+
+            return Json(response);
         }
 
         private SelectList GetCategorySelectList()

@@ -1,4 +1,5 @@
-﻿@model IEnumerable<WT_WebMVCApp.Models.ExerciseVM>
+﻿@using Newtonsoft.Json;
+@model IEnumerable<WT_WebMVCApp.Models.ExerciseVM>
 
 @{
     ViewData["Title"] = "Index";
@@ -8,6 +9,12 @@
 
 <h2 class="text-center">All Exercises</h2>
 
+
+<script>
+    var userExercises = [];
+    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))'
+    userExercises = JSON.parse(serializedModel);
+</script>
 
 
 @foreach (var group in ExerciseGrouped)
@@ -46,7 +53,7 @@
                             }
                         </div>
                     </div>
-                    <a class="card-footer text-primary clearfix small z-1" href="#">
+                    <a class="card-footer text-primary clearfix small z-1" href="#" data-exerciseId="@exercise.ID">
                         <span class="float-left">Edit </span>
                         <span class="float-right">
                             <i class="fa fa-angle-right"></i>
@@ -54,7 +61,6 @@
                     </a>
                 </div>
             </div>
-
         }
 
     </div>
@@ -66,12 +72,38 @@
     {
     <script>
         $(function () {
+            //console.log(userExercises);
+
             $(".card-footer").on("click", function () {
-                console.log('ok');
+
+                //populate the modal
+                var exerciseId = $(this).attr("data-exerciseId");
+                var exercise = userExercises.filter(function (item) {
+                    return item.ID == exerciseId;
+                })[0];
+                console.log(exercise);
+
+                $("#exerciseModalLabel").text("Edit Exercise");
+                $("#ExerciseId").val(exercise.ID);
+                $("#Name").val(exercise.Name);
+                $("#Description").val(exercise.Description);
+                $("#Category").val(exercise.Category);
+                $("#previewImage").attr("src", exercise.ImagePath).show();
+
+                $("#AttributeHolder").empty();
+                $.each(exercise.Attributes, function (index, item) {
+                    var clone = $(".clonableRow").clone();
+                    $(clone).removeClass("clonableRow");
+                    $(clone).addClass("AttributeInstance");
+                    $(clone).find(".AttributeId").first().val(item.ID);
+                    $(clone).find(".AttributeNameSpan").first().text(item.AttributeName);
+                    $(clone).find(".AttributeNameInput").first().val(item.AttributeName);
+                    $(clone).find(".AttributeValue").first().val(item.AttributeValue);
+                    $(clone).show();
+                    $(clone).appendTo("#AttributeHolder");
+                });
                 $("#exerciseModal").modal("show");
-
             });
-
 
         });
     </script>

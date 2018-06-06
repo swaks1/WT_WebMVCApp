@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using WT_WebMVCApp.Helpers;
 
 namespace WT_WebMVCApp.Services
 {
@@ -29,7 +30,7 @@ namespace WT_WebMVCApp.Services
             //    _httpClient.SetBearerToken(accessToken);
             //}
 
-            _httpClient.BaseAddress = new Uri("http://localhost:8080/");
+            _httpClient.BaseAddress = new Uri(WorkotTrackerHelper.ApiUrl);
             _httpClient.DefaultRequestHeaders.Accept.Clear();
             _httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
