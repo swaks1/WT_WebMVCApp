@@ -20,6 +20,7 @@ namespace WT_WebMVCApp.Services
         }
 
 
+        #region Exercises
 
         public async Task<WTServiceResponse<List<ExerciseVM>>> GetExercisesForUser(UserVM user)
         {
@@ -39,7 +40,6 @@ namespace WT_WebMVCApp.Services
                 };
             });
         }
-
 
         public async Task<WTServiceResponse<ExerciseVM>> AddExercise(ExerciseVM exercise)
         {
@@ -75,15 +75,14 @@ namespace WT_WebMVCApp.Services
                                                 new StringContent(serializedExercise, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
-           {
-               return new WTServiceResponse<string>
-               {
-                   StatusCode = response.StatusCode,
-                   ViewModel = "",
-               };
-           });
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
         }
-
 
         public async Task<WTServiceResponse<string>> DeleteExercise(int id)
         {
@@ -102,13 +101,36 @@ namespace WT_WebMVCApp.Services
             });
         }
 
+        #endregion
 
 
+
+        #region Routines
+
+        public async Task<WTServiceResponse<List<WorkoutRoutineVM>>> GetRoutinesForUser(UserVM user)
+        {
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.GetAsync($"/api/Routines/user/{user.ID}");
+
+            return await HandleApiResponse(response, async () =>
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var routines = JsonConvert.DeserializeObject<List<WorkoutRoutineVM>>(content);
+
+                return new WTServiceResponse<List<WorkoutRoutineVM>>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = routines,
+                };
+            });
+        }
+
+        #endregion
 
 
 
         #region Handle Response Methods (sync and async)
-
 
         private WTServiceResponse<T> HandleApiResponse<T>(HttpResponseMessage response, Func<WTServiceResponse<T>> onSuccess)
         {

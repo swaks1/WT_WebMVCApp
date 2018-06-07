@@ -429,6 +429,14 @@ body.sidenav-toggled .navbar-sidenav-tooltip.show {
   transform: rotate(15deg);
 }
 
+.card-body-icon-square {
+    position: absolute;
+    z-index: 0;
+    top: -30px;
+    right: -25px;
+    font-size: 5rem;
+}
+
 @media (min-width: 576px) {
   .card-columns {
     column-count: 1;

@@ -14,7 +14,7 @@
         </h2>
     </div>
 </div>
-<div class="row">
+<div class="row pl-4">
     <div class="col-md-12 mb-5">
         <button type="button" class="btn btn-success btn-sm" id="addNewExercise" data-toggle="tooltip" data-placement="top" title="Add New Exercise">
             Add new Exercise <i class="fa fa-plus"></i>
@@ -36,7 +36,7 @@
     var category = group.Key;
     var ExerciseCategory = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(category.ToString().ToLower());
 
-    <div class="row mb-2">
+    <div class="row mb-2 pl-4">
         <div class="col-md-12">
             <h2>
                 @ExerciseCategory
@@ -118,17 +118,22 @@
 
                 $("#AttributeHolder").empty();
                 //add mandatory attributes when creating new
-                var mandatoryAttributes = ["No.Sets", "No.Repetitions"];
+                var mandatoryAttributes = [
+                    { name: "No.Sets", value: "5", deletable: "false" },
+                    { name: "No.Repetitions", value: "5", deletable: "false" },
+                    { name: "Weight", value: "40", deletable: "true" }
+                ];
                 $.each(mandatoryAttributes, function (index, item) {
                     var clone = $(".clonableRow").clone();
                     $(clone).removeClass("clonableRow");
                     $(clone).addClass("AttributeInstance");
                     $(clone).find(".AttributeId").first().val(0);
-                    $(clone).find(".AttributeDeletable").first().val("false");
-                    $(clone).find(".AttributeNameSpan").first().text(item);
-                    $(clone).find(".AttributeNameInput").first().val(item);
-                    $(clone).find(".AttributeValue").first().val("5").attr("readonly",false);
-                    $(clone).find(".attrDelete").first().remove();
+                    $(clone).find(".AttributeDeletable").first().val(item.deletable);
+                    $(clone).find(".AttributeNameSpan").first().text(item.name);
+                    $(clone).find(".AttributeNameInput").first().val(item.name);
+                    $(clone).find(".AttributeValue").first().val(item.value).attr("readonly", false);
+                    if (item.deletable == "false")
+                        $(clone).find(".attrDelete").first().remove();
                     $(clone).find(".attrEdit").first().remove();
 
                     $(clone).show();

@@ -15,7 +15,7 @@
         <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
             <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Workout Session" id="item-WorkoutSession">
                 <a asp-area="" asp-controller="WorkoutSession" asp-action="Index" class="nav-link">
-                    <img src="~/icons/barbell-24.png" />
+                    <img src="~/icons/session.png" />
                     <span class="nav-link-text">Workout Session</span>
                 </a>
             </li>
@@ -27,7 +27,7 @@
             </li>
             <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Routines" id="item-WorkoutRoutine">
                 <a asp-area="" asp-controller="WorkoutRoutine" asp-action="Index" class="nav-link">
-                    <img src="~/icons/barbell-24.png" />
+                    <img src="~/icons/routine.png" />
                     <span class="nav-link-text">Routines</span>
                 </a>
             </li>
@@ -140,7 +140,7 @@
                     <a class="dropdown-item small" href="#">View all alerts</a>
                 </div>
             </li>
-            <li class="nav-item">
+            <!--<li class="nav-item">
                 <form class="form-inline my-2 my-lg-0 mr-lg-2">
                     <div class="input-group">
                         <input class="form-control" type="text" placeholder="Search for...">
@@ -151,7 +151,7 @@
                         </span>
                     </div>
                 </form>
-            </li>
+            </li>*-->
             <li class="nav-item">
                 <a class="nav-link" data-toggle="modal" data-target="#exampleModal">
                     <i class="fa fa-fw fa-sign-out"></i>Logout
@@ -176,4 +176,10 @@
     });
 
 </script>
+
+<style>
+    .dropdown-menu{
+        left:-275px !important;
+    }
+</style>
 

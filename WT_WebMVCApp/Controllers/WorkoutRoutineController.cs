@@ -28,9 +28,12 @@ namespace WT_WebMVCApp.Controllers
         public async Task<IActionResult> Index()
         {
             var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
-            var response = await _workoutTrackerService.GetExercisesForUser(UserVM);
+            var response = await _workoutTrackerService.GetRoutinesForUser(UserVM);
+            
             //set image path relative to api's URL ... 
             response.ViewModel.ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
+            response.ViewModel.ForEach(item => item.Exercises.ToList()
+                                                            .ForEach(img => img.ImagePath = WorkotTrackerHelper.ApiUrl + img.ImagePath));
 
             ViewData["Category"] = GetCategorySelectList();
 

@@ -1,0 +1,215 @@
+﻿@using Newtonsoft.Json;
+@model IEnumerable<WT_WebMVCApp.Models.WorkoutRoutineVM>
+
+@{
+    ViewData["Title"] = "Workout Routines";
+
+}
+
+<div class="row pl-4">
+    <div class="col-md-12 text-center">
+        <h2>
+            All Routines
+        </h2>
+    </div>
+</div>
+<div class="row pl-4">
+    <div class="col-md-12 mb-5">
+        <button type="button" class="btn btn-success btn-sm" id="addNewRoutine" data-toggle="tooltip" data-placement="top" title="Add New Routine">
+            Add new Routine <i class="fa fa-plus"></i>
+        </button>
+    </div>
+</div>
+
+
+
+<script>
+    var userRoutines = [];
+    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))'
+    userRoutines = JSON.parse(serializedModel);
+</script>
+
+
+    <div class="row mb-2 pl-4">
+        @foreach (var routine in Model)
+        {
+        <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card border-dark" style="width: 18rem;overflow:hidden">
+                <div class="card-body mb-4">
+
+                    <div class="card-body-icon-square">
+                        <img style="height:100px;width:100px" class="img-responsive" src="@routine.ImagePath" />
+                    </div>
+
+                    <h5 class="card-title">@routine.Name</h5>
+                    <p class="card-text text-muted">@routine.Description</p>
+
+                </div>
+
+                    <div class="text-center">
+                        <h6>
+                            Exercises: &nbsp;
+                            <button type="button" class="btn btn-success btn-sm addExerciseToRoutine" data-toggle="tooltip" data-placement="top" title="Add Exercises to Routine" data-routineId="@routine.ID">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </h6>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var exercise in routine.Exercises)
+                        {
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="col-md-10 text-uppercase font-weight-bold">
+                                        @exercise.Name
+                                    </div>
+                                    <div class="col-md-2 p-0 text-center">
+                                        <img style="height:2.5rem;width:2.5rem" class="rounded-circle img-responsive" src="@exercise.ImagePath" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    @foreach (var attribute in exercise.Attributes)
+                                    {
+                                        <div class="col-md-12">
+                                            <span class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="@attribute.AttributeValue">
+                                                @attribute.AttributeName
+                                            </span>
+                                        </div>
+                                    }
+
+                                </div>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-sm editRoutine" data-toggle="tooltip" data-placement="top" title="Edit Routine" data-routineId="@routine.ID">
+                            Edit <i class="fa fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm deleteRoutine" data-toggle="tooltip" data-placement="top" title="Delete Routine" data-routineId="@routine.ID">
+                            Delete <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+            </div>
+        </div>
+        }
+
+    </div>
+
+
+<style>
+    .list-group-item{
+        cursor:pointer;
+    }
+
+        .list-group-item:hover {
+            border-left: 2px solid black;
+            background-color: #e0e0eb;
+        }
+</style>
+
+@section Scripts
+    {
+    <script>
+        $(function () {
+            //console.log(userExercises);
+
+
+            $("#addNewExercise").on("click", function () {
+                //populate the modal
+                var routineId = 0;
+
+                $("#exerciseModalLabel").text("Add Exercise");
+                $("#routineId").val(routineId);
+                $("#Name").val("");
+                $("#Description").val("");
+                $("#Category").val("");
+                $("#previewImage").attr("src", "").hide();
+                $("#ErrorMessage").hide();
+                $("label.error").hide();
+
+                $("#AttributeHolder").empty();
+                //add mandatory attributes when creating new
+                var mandatoryAttributes = ["No.Sets", "No.Repetitions"];
+                $.each(mandatoryAttributes, function (index, item) {
+                    var clone = $(".clonableRow").clone();
+                    $(clone).removeClass("clonableRow");
+                    $(clone).addClass("AttributeInstance");
+                    $(clone).find(".AttributeId").first().val(0);
+                    $(clone).find(".AttributeDeletable").first().val("false");
+                    $(clone).find(".AttributeNameSpan").first().text(item);
+                    $(clone).find(".AttributeNameInput").first().val(item);
+                    $(clone).find(".AttributeValue").first().val("5").attr("readonly",false);
+                    $(clone).find(".attrDelete").first().remove();
+                    $(clone).find(".attrEdit").first().remove();
+
+                    $(clone).show();
+                    $(clone).appendTo("#AttributeHolder");
+                });
+
+                $("#exerciseModal").modal("show");
+            });
+
+
+            $(".editExercise").on("click", function () {
+                //populate the modal
+                var routineId = $(this).attr("data-routineId");
+                var exercise = userExercises.filter(function (item) {
+                    return item.ID == routineId;
+                })[0];
+                //console.log(exercise);
+
+                $("#exerciseModalLabel").text("Edit Exercise");
+                $("#routineId").val(exercise.ID);
+                $("#Name").val(exercise.Name);
+                $("#Description").val(exercise.Description);
+                $("#Category").val(exercise.Category);
+                $("#previewImage").attr("src", exercise.ImagePath).show();
+                $("#ErrorMessage").hide();
+                $("label.error").hide();
+
+                $("#AttributeHolder").empty();
+                $.each(exercise.Attributes, function (index, item) {
+                    var clone = $(".clonableRow").clone();
+                    $(clone).removeClass("clonableRow");
+                    $(clone).addClass("AttributeInstance");
+                    $(clone).find(".AttributeId").first().val(item.ID);
+                    $(clone).find(".AttributeDeletable").first().val(item.IsDeletable);
+                    $(clone).find(".AttributeNameSpan").first().text(item.AttributeName);
+                    $(clone).find(".AttributeNameInput").first().val(item.AttributeName);
+                    $(clone).find(".AttributeValue").first().val(item.AttributeValue);
+                    if (item.IsDeletable == false)
+                        $(clone).find(".attrDelete").first().remove();
+
+                    $(clone).show();
+                    $(clone).appendTo("#AttributeHolder");
+                });
+                $("#exerciseModal").modal("show");
+            });
+
+
+
+            $(".deleteExercise").on("click", function () {
+                //populate the modal
+                var routineId = $(this).attr("data-routineId");
+                var exercise = userExercises.filter(function (item) {
+                    return item.ID == routineId;
+                })[0];
+                //console.log(exercise);
+
+                $("#del-routineId").val(exercise.ID);
+                $("#del-Name").val(exercise.Name);
+                $("#del-previewImage").attr("src", exercise.ImagePath).show();
+                $("#del-ErrorMessage").hide();
+
+                $("#del-ExerciseModal").modal("show");
+            });
+
+
+
+        });
+    </script>
+}
+
+
+
+
