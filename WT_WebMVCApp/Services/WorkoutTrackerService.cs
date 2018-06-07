@@ -19,6 +19,8 @@ namespace WT_WebMVCApp.Services
             _workoutTrackerHttpClient = workoutTrackerHttpClient;
         }
 
+
+
         public async Task<WTServiceResponse<List<ExerciseVM>>> GetExercisesForUser(UserVM user)
         {
             var httpClient = await _workoutTrackerHttpClient.GetClient();
@@ -38,25 +40,74 @@ namespace WT_WebMVCApp.Services
             });
         }
 
-        public async Task<WTServiceResponse<ExerciseVM>> SaveExerciseForUser(ExerciseVM exercise)
-        {                    
+
+        public async Task<WTServiceResponse<ExerciseVM>> AddExercise(ExerciseVM exercise)
+        {
             // serialize it
             var serializedExercise = JsonConvert.SerializeObject(exercise);
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PutAsync($"/api/Exercises/user/{WorkotTrackerHelper.UserId}/exercise/{exercise.ID}", 
+            var response = await httpClient.PostAsync($"/api/Exercises/user/{WorkotTrackerHelper.UserId}",
                                                 new StringContent(serializedExercise, System.Text.Encoding.Unicode, "application/json"));
-       
-            return  HandleApiResponse(response, () =>
+
+            return await HandleApiResponse(response, async () =>
             {
+                var content = await response.Content.ReadAsStringAsync();
+                var exerciseVM = JsonConvert.DeserializeObject<ExerciseVM>(content);
+
                 return new WTServiceResponse<ExerciseVM>
                 {
                     StatusCode = response.StatusCode,
-                    ViewModel = null,
+                    ViewModel = exerciseVM,
                 };
             });
         }
+
+        public async Task<WTServiceResponse<string>> SaveExercise(ExerciseVM exercise)
+        {
+            // serialize it
+            var serializedExercise = JsonConvert.SerializeObject(exercise);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PutAsync($"/api/Exercises/user/{WorkotTrackerHelper.UserId}/exercise/{exercise.ID}",
+                                                new StringContent(serializedExercise, System.Text.Encoding.Unicode, "application/json"));
+
+            return HandleApiResponse(response, () =>
+           {
+               return new WTServiceResponse<string>
+               {
+                   StatusCode = response.StatusCode,
+                   ViewModel = "",
+               };
+           });
+        }
+
+
+        public async Task<WTServiceResponse<string>> DeleteExercise(int id)
+        {
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.DeleteAsync($"/api/Exercises/user/{WorkotTrackerHelper.UserId}/exercise/{id}");
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
+
+
+
+
+
+
+        #region Handle Response Methods (sync and async)
 
 
         private WTServiceResponse<T> HandleApiResponse<T>(HttpResponseMessage response, Func<WTServiceResponse<T>> onSuccess)
@@ -113,6 +164,8 @@ namespace WT_WebMVCApp.Services
                     }
             }
         }
+
+        #endregion
 
     }
 }

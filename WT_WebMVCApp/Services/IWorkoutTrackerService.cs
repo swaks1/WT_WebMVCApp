@@ -9,6 +9,8 @@ namespace WT_WebMVCApp.Services
     public interface IWorkoutTrackerService
     {
         Task<WTServiceResponse<List<ExerciseVM>>> GetExercisesForUser(UserVM user);
-        Task<WTServiceResponse<ExerciseVM>> SaveExerciseForUser(ExerciseVM exercise);
+        Task<WTServiceResponse<string>> SaveExercise(ExerciseVM exercise);
+        Task<WTServiceResponse<string>> DeleteExercise(int iD);
+        Task<WTServiceResponse<ExerciseVM>> AddExercise(ExerciseVM exercise);
     }
 }

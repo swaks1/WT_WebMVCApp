@@ -7,7 +7,21 @@
     var ExerciseGrouped = Model.GroupBy(ex => ex.Category);
 }
 
-<h2 class="text-center">All Exercises</h2>
+<div class="row">
+    <div class="col-md-12 text-center">
+        <h2>
+            All Exercises
+        </h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 mb-5">
+        <button type="button" class="btn btn-success btn-sm" id="addNewExercise" data-toggle="tooltip" data-placement="top" title="Add New Exercise">
+            Add new Exercise <i class="fa fa-plus"></i>
+        </button>
+    </div>
+</div>
+
 
 
 <script>
@@ -24,7 +38,9 @@
 
     <div class="row mb-2">
         <div class="col-md-12">
-            <h2>@ExerciseCategory</h2>
+            <h2>
+                @ExerciseCategory
+            </h2>
         </div>
 
         @foreach (var exercise in group)
@@ -35,16 +51,28 @@
                         <div class="card-body-icon">
                             <img style="height:100px;width:100px" class="rounded-circle img-responsive" src="@exercise.ImagePath" />
                         </div>
-                        <div class="mr-5">
-                            <h3 class="text-capitalize">@exercise.Name</h3>
+
+                        <div class="text-left">
+                            <button type="button" class="btn btn-sm deleteExercise" data-toggle="tooltip" data-placement="top" title="Delete Exercise" data-exerciseId="@exercise.ID">
+                                <i class="fa fa-times"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm editExercise" data-toggle="tooltip" data-placement="top" title="Edit Exercise" data-exerciseId="@exercise.ID">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        </div>
+
+                        <div class="mr-5 mt-2">
+                            <h3 class="text-capitalize text-center">@exercise.Name</h3>
                             <hr />
 
+                            <h6>Description: </h6>
                             <blockquote class="blockquote">
                                 <p class="mb-0">@exercise.Description</p>
                             </blockquote>
 
                             <hr />
 
+                            <h6>Attributes: </h6>
                             @foreach (var attribute in exercise.Attributes)
                             {
                                 <span class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="@attribute.AttributeValue">
@@ -54,9 +82,8 @@
                         </div>
                     </div>
                     <a class="card-footer text-primary clearfix small z-1" href="#" data-exerciseId="@exercise.ID">
-                        <span class="float-left">Edit </span>
                         <span class="float-right">
-                            <i class="fa fa-angle-right"></i>
+                            Add to Routine <i class="fa fa-angle-right"></i>
                         </span>
                     </a>
                 </div>
@@ -67,6 +94,7 @@
 }
 
 @Html.Partial("_ExerciseModal.cshtml")
+@Html.Partial("_ExerciseDeleteModal.cshtml")
 
 @section Scripts
     {
@@ -74,14 +102,50 @@
         $(function () {
             //console.log(userExercises);
 
-            $(".card-footer").on("click", function () {
 
+            $("#addNewExercise").on("click", function () {
+                //populate the modal
+                var exerciseId = 0;
+
+                $("#exerciseModalLabel").text("Add Exercise");
+                $("#ExerciseId").val(exerciseId);
+                $("#Name").val("");
+                $("#Description").val("");
+                $("#Category").val("");
+                $("#previewImage").attr("src", "").hide();
+                $("#ErrorMessage").hide();
+                $("label.error").hide();
+
+                $("#AttributeHolder").empty();
+                //add mandatory attributes when creating new
+                var mandatoryAttributes = ["No.Sets", "No.Repetitions"];
+                $.each(mandatoryAttributes, function (index, item) {
+                    var clone = $(".clonableRow").clone();
+                    $(clone).removeClass("clonableRow");
+                    $(clone).addClass("AttributeInstance");
+                    $(clone).find(".AttributeId").first().val(0);
+                    $(clone).find(".AttributeDeletable").first().val("false");
+                    $(clone).find(".AttributeNameSpan").first().text(item);
+                    $(clone).find(".AttributeNameInput").first().val(item);
+                    $(clone).find(".AttributeValue").first().val("5").attr("readonly",false);
+                    $(clone).find(".attrDelete").first().remove();
+                    $(clone).find(".attrEdit").first().remove();
+
+                    $(clone).show();
+                    $(clone).appendTo("#AttributeHolder");
+                });
+
+                $("#exerciseModal").modal("show");
+            });
+
+
+            $(".editExercise").on("click", function () {
                 //populate the modal
                 var exerciseId = $(this).attr("data-exerciseId");
                 var exercise = userExercises.filter(function (item) {
                     return item.ID == exerciseId;
                 })[0];
-                console.log(exercise);
+                //console.log(exercise);
 
                 $("#exerciseModalLabel").text("Edit Exercise");
                 $("#ExerciseId").val(exercise.ID);
@@ -89,6 +153,8 @@
                 $("#Description").val(exercise.Description);
                 $("#Category").val(exercise.Category);
                 $("#previewImage").attr("src", exercise.ImagePath).show();
+                $("#ErrorMessage").hide();
+                $("label.error").hide();
 
                 $("#AttributeHolder").empty();
                 $.each(exercise.Attributes, function (index, item) {
@@ -96,14 +162,38 @@
                     $(clone).removeClass("clonableRow");
                     $(clone).addClass("AttributeInstance");
                     $(clone).find(".AttributeId").first().val(item.ID);
+                    $(clone).find(".AttributeDeletable").first().val(item.IsDeletable);
                     $(clone).find(".AttributeNameSpan").first().text(item.AttributeName);
                     $(clone).find(".AttributeNameInput").first().val(item.AttributeName);
                     $(clone).find(".AttributeValue").first().val(item.AttributeValue);
+                    if (item.IsDeletable == false)
+                        $(clone).find(".attrDelete").first().remove();
+
                     $(clone).show();
                     $(clone).appendTo("#AttributeHolder");
                 });
                 $("#exerciseModal").modal("show");
             });
+
+
+
+            $(".deleteExercise").on("click", function () {
+                //populate the modal
+                var exerciseId = $(this).attr("data-exerciseId");
+                var exercise = userExercises.filter(function (item) {
+                    return item.ID == exerciseId;
+                })[0];
+                //console.log(exercise);
+
+                $("#del-ExerciseId").val(exercise.ID);
+                $("#del-Name").val(exercise.Name);
+                $("#del-previewImage").attr("src", exercise.ImagePath).show();
+                $("#del-ErrorMessage").hide();
+
+                $("#del-ExerciseModal").modal("show");
+            });
+
+
 
         });
     </script>

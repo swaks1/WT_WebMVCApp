@@ -13,12 +13,12 @@ using System.IO;
 
 namespace WT_WebMVCApp.Controllers
 {
-    public class WorkoutExerciseController : Controller
+    public class WorkoutRoutineController : Controller
     {
-        private readonly ILogger<WorkoutSessionController> _logger;
+        private readonly ILogger<WorkoutRoutineController> _logger;
         private readonly IWorkoutTrackerService _workoutTrackerService;
 
-        public WorkoutExerciseController(ILogger<WorkoutSessionController> logger, IWorkoutTrackerService workoutTrackerService)
+        public WorkoutRoutineController(ILogger<WorkoutRoutineController> logger, IWorkoutTrackerService workoutTrackerService)
         {
             _logger = logger;
             _workoutTrackerService = workoutTrackerService;

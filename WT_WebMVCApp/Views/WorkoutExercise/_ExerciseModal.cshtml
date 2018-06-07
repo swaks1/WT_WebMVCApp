@@ -10,14 +10,14 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">                
-                <form id="exerciseForm">
+            <div class="modal-body">
+                <form id="exerciseForm" asp-antiforgery="true">
                     <div class="row mb-3">
                         <div class="col-md-3 text-left">
                             <label for="Name" class="form-label mr-1">Name:</label>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="Name">
+                            <input type="text" class="form-control" id="Name" required>
                             <input type="hidden" id="ExerciseId">
                         </div>
                     </div>
@@ -36,7 +36,7 @@
                             <label for="Category" class="form-label mr-1">Category:</label>
                         </div>
                         <div class="col-md-6">
-                            @Html.DropDownList("Category", ViewData["Category"] as SelectList, " - ", new { @class = "form-control", @id = "Category" })
+                            @Html.DropDownList("Category", ViewData["Category"] as SelectList, " - ", new { @class = "form-control required", @id = "Category" })
                         </div>
                     </div>
 
@@ -74,17 +74,18 @@
                             </div>
                         </div>
 
-                        <!-- Just a template it is not shown yet-->
+                        <!-- Just a template it is not shown yet.. AttributeInstance class will be added when cloned-->
                         <div class="row mb-2 clonableRow" style="display:none">
-                            <div class="col-md-5 pt-0 text-right">
-                                <input type="hidden" class="AttributeId" value="0">
+                            <input type="hidden" class="AttributeId" value="0">
+                            <input type="hidden" class="AttributeDeletable" value="false">
+                            <div class="col-md-5 pt-0 text-center">
                                 <span class="badge badge-pill badge-secondary AttributeNameSpan"></span>
                                 <input type="text" class="form-control form-control-sm AttributeNameInput" style="display:none">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-3 text-center">
                                 <input type="text" class="form-control form-control-sm AttributeValue" readonly>
                             </div>
-                            <div class="col-md-4 pt-0">
+                            <div class="col-md-4 pt-0 text-center">
                                 <button type="button" class="btn btn-warning btn-sm attrEdit" data-toggle="tooltip" data-placement="top" title="Edit Attribute">
                                     <i class="fa fa-edit"></i>
                                 </button>
@@ -100,9 +101,10 @@
                     </div>
 
                 </form>
+
+                <div class="p-3 mb-2 bg-danger text-white" id="ErrorMessage" style="display:none"></div>
             </div>
             <div class="modal-footer">
-                <div class="p-3 mb-2 bg-danger text-white" id="ErrorMessage" style="display:none"></div>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="saveExerciseBtn">Save exercise</button>
             </div>
@@ -119,6 +121,8 @@
 
 
     $(function () {
+
+
         $("#previewImage").hide();
 
         $(".attrAddNew").click(function () {
@@ -128,6 +132,7 @@
             $(clone).removeClass("clonableRow");
             $(clone).addClass("AttributeInstance");
 
+            $(clone).find(".AttributeDeletable").val("true");
 
             $(clone).find(".AttributeNameSpan").hide();
             $(clone).find(".AttributeNameInput").show();
@@ -151,8 +156,11 @@
             $(this).tooltip('hide');
             var attributeInstance = $(this).closest('.AttributeInstance');
 
-            $(attributeInstance).find(".AttributeNameSpan").hide();
-            $(attributeInstance).find(".AttributeNameInput").show();
+            var isDeletable = $(attributeInstance).find(".AttributeDeletable").val();
+            if (isDeletable != "false") {
+                $(attributeInstance).find(".AttributeNameSpan").hide();
+                $(attributeInstance).find(".AttributeNameInput").show();
+            }
 
             $(attributeInstance).find(".AttributeValue").attr("readonly", false);
 
@@ -175,10 +183,23 @@
         });
 
 
-
+        //when clicking on Save Button SUBMIT the form (it goes below in validate function)
         $("#saveExerciseBtn").click(function () {
-            var url = '@Url.Action("SaveExercise", "WorkoutExercise")';
-            var data = new FormData();
+             $("#exerciseForm").submit();
+        })
+
+        //when is submited this validation will fire (jqueryvalidation.org - jquery.validate.js)
+        //if successfull submitHandler is called
+        $("#exerciseForm").validate({
+            submitHandler: function (form) {
+                saveExercise();
+            }
+        });
+
+        function saveExercise() {
+            var form = $("#exerciseForm");
+            //we add the form in the constructor for the AntiForgery Token to be added in the form data
+            var data = new FormData(form.get(0)); 
 
             var name = $("#Name").val();
             var id = $("#ExerciseId").val();
@@ -189,11 +210,20 @@
             var attributes = [];
             var attributeInstances = $(".AttributeInstance");
             $.each(attributeInstances, function (index,item) {
+                var attrName = $(item).find(".AttributeNameInput").val();
+                var attrValue = $(item).find(".AttributeValue").val();
+                var isDeletable = $(item).find(".AttributeDeletable").val();
+
+                if (attrName.trim() == "" || attrValue.trim() == "") {
+                    $(item).remove();
+                    return true; //this is continue in jQuery.each
+                }
 
                 var attributeObject = {
                     ID: $(item).find(".AttributeId").val(),
-                    AttributeName: $(item).find(".AttributeNameInput").val(),
-                    AttributeValue: $(item).find(".AttributeValue").val(),
+                    AttributeName: attrName,
+                    AttributeValue: attrValue,
+                    IsDeletable: isDeletable
                 }
                 attributes.push(attributeObject);
             });
@@ -205,23 +235,32 @@
             data.append("Image", image);
             data.append("AttributesSerialized", JSON.stringify(attributes));
 
+            ShowLoader("modal-content");
+
+            var url = '@Url.Action("SaveExercise", "WorkoutExercise")';
+            if (id == 0)
+                url = '@Url.Action("AddExercise", "WorkoutExercise")';
+
             jQuery.ajax({
                 url: url,
                 data: data,
                 cache: false,
-                contentType: false,
-                processData: false,
+                contentType: false, //needed for setting to multipart..
+                processData: false, //needed for sending files not to be serialized to string..
                 method: 'POST',
                 success: function (data) {
-                    ShowLoader("exerciseForm");
+                    $("#exerciseModal").modal('hide');
+                    //HideLoader();
                     window.location = '@Url.Action("Index", "WorkoutExercise")';
                 },
                 error: function (data) {
-                    $("#ErrorMessage").text(data).show();
-                    console.log(data);
+                    HideLoader();
+                    $("#ErrorMessage").text(JSON.stringify(data)).show();
                 }
             });
 
-        })
+        }
+
+
     })
 </script>

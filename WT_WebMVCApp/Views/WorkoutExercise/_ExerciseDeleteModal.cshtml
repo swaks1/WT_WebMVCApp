@@ -1,0 +1,73 @@
+﻿<!--This gets populated in WorkoutExercises-Index view -->
+
+
+<div class="modal fade" id="del-ExerciseModal" tabindex="-1" role="dialog" aria-labelledby="del-ExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">        
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="del-ExerciseModalLabel">Delete Exercise ? </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="del-ExerciseForm" asp-antiforgery="true">
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="del-Name" class="form-label mr-1">Name:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="del-Name" readonly> 
+                            <input type="hidden" id="del-ExerciseId">
+                        </div>
+                        <div class="col-md-3">
+                                <img class="img-responsive rounded-circle" id="del-previewImage" alt="Image for Exercise" width="100" height="100" />
+                        </div>
+                    </div>
+                </form>
+
+                <div class="p-3 mb-2 bg-danger text-white" id="del-ErrorMessage" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="del-ExerciseBtn">Delete exercise</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        $("#del-previewImage").hide();
+
+        $("#del-ExerciseBtn").click(function () {
+            var url = '@Url.Action("DeleteExercise", "WorkoutExercise")';
+            var form = $("#del-ExerciseForm");
+            //we add the form in the constructor for the AntiForgery Token to be added in the form data
+            var data = new FormData(form.get(0)); 
+
+            var id = $("#del-ExerciseId").val();
+            data.append("ID", id);
+
+            ShowLoader("modal-content");
+
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false, //needed for setting to multipart
+                processData: false,
+                method: 'POST',
+                success: function (data) {
+                    //HideLoader();
+                    window.location = '@Url.Action("Index", "WorkoutExercise")';
+                },
+                error: function (data) {
+                    HideLoader();
+                    $("#del-ErrorMessage").text(JSON.stringify(data)).show();
+                }
+            });
+
+        })
+    })
+</script>

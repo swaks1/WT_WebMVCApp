@@ -11,4 +11,9 @@
     background-position: center;
     background-repeat: no-repeat;
     background-image: url('../images/spinner.gif');
+    border: 3px solid black;
+}
+
+.error{
+    color:red;
 }
