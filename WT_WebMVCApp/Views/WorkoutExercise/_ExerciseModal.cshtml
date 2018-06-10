@@ -250,7 +250,11 @@
                 method: 'POST',
                 success: function (data) {
                     $("#exerciseModal").modal('hide');
-                    //HideLoader();
+
+                    //find the category and set sessionScroll to the offset...Than in index the page will scroll to that postion
+                    var categoryScrollTop = $("[data-CategoryNumber=" + category + "]").first().offset().top - 70;
+                    sessionStorage.scrollTop = categoryScrollTop;
+
                     window.location = '@Url.Action("Index", "WorkoutExercise")';
                 },
                 error: function (data) {

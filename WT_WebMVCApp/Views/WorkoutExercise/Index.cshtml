@@ -34,11 +34,12 @@
 @foreach (var group in ExerciseGrouped)
 {
     var category = group.Key;
+    var ExerciseCategoryNumber = (int)category;
     var ExerciseCategory = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(category.ToString().ToLower());
 
     <div class="row mb-2 pl-4">
         <div class="col-md-12">
-            <h2>
+            <h2 data-CategoryNumber="@ExerciseCategoryNumber">
                 @ExerciseCategory
             </h2>
         </div>
@@ -52,40 +53,34 @@
                             <img style="height:100px;width:100px" class="rounded-circle img-responsive" src="@exercise.ImagePath" />
                         </div>
 
-                        <div class="text-left">
-                            <button type="button" class="btn btn-sm deleteExercise" data-toggle="tooltip" data-placement="top" title="Delete Exercise" data-exerciseId="@exercise.ID">
-                                <i class="fa fa-times"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm editExercise" data-toggle="tooltip" data-placement="top" title="Edit Exercise" data-exerciseId="@exercise.ID">
-                                <i class="fa fa-edit"></i>
-                            </button>
-                        </div>
-
-                        <div class="mr-5 mt-2">
-                            <h3 class="text-capitalize text-center">@exercise.Name</h3>
-                            <hr />
-
-                            <h6>Description: </h6>
-                            <blockquote class="blockquote">
-                                <p class="mb-0">@exercise.Description</p>
-                            </blockquote>
-
-                            <hr />
-
-                            <h6>Attributes: </h6>
-                            @foreach (var attribute in exercise.Attributes)
-                            {
-                                <span class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="@attribute.AttributeValue">
-                                    @attribute.AttributeName
-                                </span>
-                            }
+                        <div class="row mr-5 mt-2">
+                            <div class="col-md-12">
+                                <h3 class="text-capitalize text-center">@exercise.Name</h3>
+                                <hr />
+                            </div>
+                            <div class="col-md-8">
+                                <blockquote class="blockquote">
+                                    <p class="mb-0">@exercise.Description</p>
+                                </blockquote>
+                            </div>
+                            <div class="col-md-4">
+                                @foreach (var attribute in exercise.Attributes)
+                                {
+                                    <span class="badge badge-pill badge-secondary" data-toggle="tooltip" data-placement="top" title="@attribute.AttributeValue">
+                                        @attribute.AttributeName
+                                    </span>
+                                }
+                            </div>
                         </div>
                     </div>
-                    <a class="card-footer text-primary clearfix small z-1" href="#" data-exerciseId="@exercise.ID">
-                        <span class="float-right">
-                            Add to Routine <i class="fa fa-angle-right"></i>
-                        </span>
-                    </a>
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-sm deleteExercise" data-toggle="tooltip" data-placement="top" title="Delete Exercise" data-exerciseId="@exercise.ID">
+                           Delete <i class="fa fa-times"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm editExercise" data-toggle="tooltip" data-placement="top" title="Edit Exercise" data-exerciseId="@exercise.ID">
+                           Edit <i class="fa fa-edit"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         }
@@ -94,7 +89,7 @@
 }
 
 @Html.Partial("_ExerciseModal.cshtml")
-@Html.Partial("_ExerciseDeleteModal.cshtml")
+@Html.Partial("_DeleteExerciseModal.cshtml")
 
 @section Scripts
     {
@@ -102,6 +97,15 @@
         $(function () {
             //console.log(userExercises);
 
+            //scroll to where we left on page reload 
+            if (sessionStorage.scrollTop != "undefined") {
+                $('html, body').animate({ scrollTop: sessionStorage.scrollTop }, 1000, 'swing');
+            }
+
+            //remember scroll in sessionStorage
+            $(window).scroll(function () {
+                sessionStorage.scrollTop = $(this).scrollTop();
+            });
 
             $("#addNewExercise").on("click", function () {
                 //populate the modal

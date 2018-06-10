@@ -10,6 +10,7 @@ using WT_WebMVCApp.Helpers;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 using System.IO;
+using WT_WebMVCApp.Models.WorkoutAssets;
 
 namespace WT_WebMVCApp.Controllers
 {
@@ -28,77 +29,91 @@ namespace WT_WebMVCApp.Controllers
         public async Task<IActionResult> Index()
         {
             var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
-            var response = await _workoutTrackerService.GetRoutinesForUser(UserVM);
-            
+            var routineResponse = await _workoutTrackerService.GetRoutinesForUser(UserVM);
+
             //set image path relative to api's URL ... 
-            response.ViewModel.ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
-            response.ViewModel.ForEach(item => item.Exercises.ToList()
+            routineResponse.ViewModel.ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
+            routineResponse.ViewModel.ForEach(item => item.Exercises.ToList()
                                                             .ForEach(img => img.ImagePath = WorkotTrackerHelper.ApiUrl + img.ImagePath));
 
-            ViewData["Category"] = GetCategorySelectList();
 
-            return View(response.ViewModel);
+            //Get exercises for the user
+            var exercisesResposne = await _workoutTrackerService.GetExercisesForUser(UserVM);
+            //set image path relative to api's URL ... 
+            exercisesResposne.ViewModel.ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
+            ViewData["Exercises"] = exercisesResposne.ViewModel;
+
+
+            return View(routineResponse.ViewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddExercise([FromForm] ExerciseVM exercise)
+        public async Task<IActionResult> AddRoutine([FromForm] WorkoutRoutineVM routine)
         {
-            var attrs = JsonConvert.DeserializeObject<List<ExerciseAttributeVM>>(exercise.AttributesSerialized);
-            exercise.Attributes = attrs;
-            if (exercise.Image != null)
+            var exercises = JsonConvert.DeserializeObject<List<ExerciseVM>>(routine.ExercisesSerialized);
+            routine.Exercises = exercises;
+            if (routine.Image != null)
             {
-                exercise.ImagePath = exercise.Image.FileName;
-                using (var fileStream = exercise.Image.OpenReadStream())
+                routine.ImagePath = routine.Image.FileName;
+                using (var fileStream = routine.Image.OpenReadStream())
                 {
                     using (var ms = new MemoryStream())
                     {
                         fileStream.CopyTo(ms);
-                        exercise.ImageBytes = ms.ToArray();
+                        routine.ImageBytes = ms.ToArray();
                     }
                 }
             }
 
-            var response = await _workoutTrackerService.AddExercise(exercise);
+            var response = await _workoutTrackerService.AddRoutine(routine);
 
             return Json(response);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveExercise([FromForm] ExerciseVM exercise)
+        public async Task<IActionResult> SaveRoutine([FromForm] WorkoutRoutineVM routine)
         {
-            var attrs = JsonConvert.DeserializeObject<List<ExerciseAttributeVM>>(exercise.AttributesSerialized);
-            exercise.Attributes = attrs;
-            if (exercise.Image != null)
+            var exercises = JsonConvert.DeserializeObject<List<ExerciseVM>>(routine.ExercisesSerialized);
+            routine.Exercises = exercises;
+            if (routine.Image != null)
             {
-                exercise.ImagePath = exercise.Image.FileName;
-                using (var fileStream = exercise.Image.OpenReadStream())
+                routine.ImagePath = routine.Image.FileName;
+                using (var fileStream = routine.Image.OpenReadStream())
                 {
                     using (var ms = new MemoryStream())
                     {
                         fileStream.CopyTo(ms);
-                        exercise.ImageBytes = ms.ToArray();
+                        routine.ImageBytes = ms.ToArray();
                     }
                 }
             }
 
-            var response = await _workoutTrackerService.SaveExercise(exercise);
+            var response = await _workoutTrackerService.SaveRoutine(routine);
 
             return Json(response);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteExercise([FromForm] int ID)
+        public async Task<IActionResult> DeleteRoutine([FromForm] int ID)
         {
-            var response = await _workoutTrackerService.DeleteExercise(ID);
+            var response = await _workoutTrackerService.DeleteRoutine(ID);
 
             return Json(response);
         }
 
-        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveExercisesForRoutine([FromForm] UpdateExerciseForRoutineModel exercisesModel)
+        {
+            exercisesModel.ExerciseIds = JsonConvert.DeserializeObject<List<int>>(exercisesModel.SerializedExerciseIds);
+            var response = await _workoutTrackerService.SaveExercisesForRoutine(exercisesModel);
+
+            return Json(response);
+        }
+
 
         private SelectList GetCategorySelectList()
         {

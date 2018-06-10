@@ -18,22 +18,26 @@ namespace WT_WebMVCApp.Services
 
         public WorkoutTrackerHttpClient(IHttpContextAccessor httpContextAccessor)
         {
-            _httpClient = new HttpClient();
+           
             _httpContextAccessor = httpContextAccessor;
         }
-
+        //should be used SCOPED ---> for every differnet request _hpptClient will be null since new instance of WorkoutTrackerHtppClient will be given 
         public async Task<HttpClient> GetClient()
         {
-            //string accessToken = await GetValidAccessToken();
-            //if (!string.IsNullOrEmpty(accessToken))
-            //{
-            //    _httpClient.SetBearerToken(accessToken);
-            //}
+            if(_httpClient == null)
+            {
+                //string accessToken = await GetValidAccessToken();
+                //if (!string.IsNullOrEmpty(accessToken))
+                //{
+                //    _httpClient.SetBearerToken(accessToken);
+                //}
+                _httpClient = new HttpClient();
+                _httpClient.BaseAddress = new Uri(WorkotTrackerHelper.ApiUrl);
+                _httpClient.DefaultRequestHeaders.Accept.Clear();
+                _httpClient.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue("application/json"));
+            }
 
-            _httpClient.BaseAddress = new Uri(WorkotTrackerHelper.ApiUrl);
-            _httpClient.DefaultRequestHeaders.Accept.Clear();
-            _httpClient.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
 
             return _httpClient;
         }

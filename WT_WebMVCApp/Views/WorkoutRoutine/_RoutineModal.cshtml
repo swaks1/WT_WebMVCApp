@@ -1,0 +1,247 @@
+﻿@{
+    var Exercises = (List<WT_WebMVCApp.Models.ExerciseVM>)ViewData["Exercises"];
+    var ExerciseGrouped = Exercises.GroupBy(ex => ex.Category);
+}
+
+<div class="modal fade" id="RoutineModal" tabindex="-1" role="dialog" aria-labelledby="RoutineModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="RoutineModalLabel">Add New Routine</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="routineForm" asp-antiforgery="true">
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="Name" class="form-label mr-1">Name:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" id="Name" required>
+                            <input type="hidden" id="RoutineId" value="0">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="Description" class="form-label mr-1">Description:</label>
+                        </div>
+                        <div class="col-md-6">
+                            <textarea class="form-control" id="Description"></textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="Image" class="form-label mr-1">Image:</label>
+                        </div>
+                        <div class="col-md-6 pr-0">
+                            <input type="file" class="form-control-file" id="Image" name="Image" accept="image/*" onchange="loadFile(event)">
+                        </div>
+                        <div class="col-md-3 pl-0">
+                            <img class="img-responsive rounded-circle" id="previewImage" alt="Image for Routine" width="100" height="100" />
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-md-12">
+                            <button type="button" class="btn btn-sm btn-success" id="addExercisesBtn">
+                                Add Exercises <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="col-md-12">
+                            <table class="table table-bordered" id="exerciseTable2" style="width:100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        @foreach (var group in ExerciseGrouped)
+                                        {
+                                            var category = group.Key;
+                                            var ExerciseCategory = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(category.ToString().ToLower());
+
+                                            <th>@ExerciseCategory</th>
+                                        }
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Code to insert into table... find total rows than iterate and in each row add from each group-->
+                                    @{
+                                        var maxRow = ExerciseGrouped
+                                            .OrderByDescending(grp => grp.Count())
+                                            .First()
+                                            .Count();
+
+                                        var currentRow = 1;
+                                        while (currentRow <= maxRow)
+                                        {
+                                            <tr>
+                                                @foreach (var group in ExerciseGrouped)
+                                                {
+                                                    var groupRow = 1;
+                                                    var exist = false;
+                                                    foreach (var exercise in group)
+                                                    {
+                                                        if (groupRow == currentRow)
+                                                        {
+                                                            exist = true;
+                                                            <td class="exerciseEntry2" data-exerciseId="@exercise.ID">
+                                                                <div>
+                                                                    <span>@exercise.Name</span> &nbsp;
+                                                                    <img style="width:45px; height:45px" src="@exercise.ImagePath" class="img-responsive" />
+                                                                </div>
+                                                            </td>
+                                                        }
+                                                        groupRow++;
+                                                    }
+                                                    if (!exist)
+                                                    {
+                                                        <td></td>
+
+                                                    }
+
+
+                                                }
+                                            </tr>
+                                            currentRow++;
+                                        }
+
+                                    }
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </form>
+
+                <div class="p-3 mb-2 bg-danger text-white" id="RoutineErrorMessage" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="RoutineModalSaveBtn">Save routine</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .modal-lg {
+        max-width: 1200px;
+    }
+
+    .exerciseEntry2:hover {
+        cursor: pointer;
+        border-top: 3px solid black;
+    }
+
+    .selectedExercise2 {
+        background-color: darkseagreen;
+        font-weight: 700;
+    }
+</style>
+
+<script>
+
+    var loadFile = function (event) {
+        $("#previewImage").attr("src", URL.createObjectURL(event.target.files[0]));
+        $("#previewImage").show();
+    };
+
+
+    $(function () {
+
+        $("#previewImage").hide();
+
+        $("#addExercisesBtn").show();
+        $('#exerciseTable2').DataTable();
+        $("#exerciseTable2_wrapper").hide();//id added to the datatbale
+
+        $(document).on("click", ".exerciseEntry2", function () {
+            $(this).toggleClass("selectedExercise2");
+        });
+
+        $("#addExercisesBtn").click(function () {
+            $(this).hide('slow')
+            $("#exerciseTable2_wrapper").show('slow');
+        });
+        //when clicking on Save Button SUBMIT the form (it goes below in validate function)
+        $("#RoutineModalSaveBtn").click(function () {
+            $("#routineForm").submit();
+        })
+
+        //when is submited this validation will fire (jqueryvalidation.org - jquery.validate.js)
+        //if successfull submitHandler is called
+        $("#routineForm").validate({
+            submitHandler: function (form) {
+                saveRoutine();
+            }
+        });
+
+        function saveRoutine() {
+            var form = $("#routineForm");
+            //we add the form in the constructor for the AntiForgery Token to be added in the form data
+            var data = new FormData(form.get(0));
+
+            var name = $("#Name").val();
+            var id = $("#RoutineId").val();
+            var description = $("#Description").val();
+            var image = $("#Image").get(0).files[0];
+
+            var exercises = [];
+            var selectedExercises = $(".selectedExercise2");
+            $.each(selectedExercises, function (index,item) {
+                var id = $(item).attr("data-exerciseId");
+
+                var exerciseObj = {
+                    ID: id,
+                };
+
+                exercises.push(exerciseObj);
+            });
+
+            data.append("Name", name );
+            data.append("ID", id);
+            data.append("Description", description);
+            data.append("Image", image);
+            data.append("ExercisesSerialized", JSON.stringify(exercises));
+
+            ShowLoader("modal-content");
+
+            var url = '@Url.Action("SaveRoutine", "WorkoutRoutine")';
+            if (id == 0)
+                url = '@Url.Action("AddRoutine", "WorkoutRoutine")';
+
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false, //needed for setting to multipart..
+                processData: false, //needed for sending files not to be serialized to string..
+                method: 'POST',
+                success: function (data) {
+
+                    if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
+                            $("#RoutineModal").modal('hide');
+                            window.location = '@Url.Action("Index", "WorkoutRoutine")';
+                    }
+                    else {
+                        HideLoader();
+                        $("#addExerciseModalErrorMessage").text(JSON.stringify(data)).show();
+                    }
+
+                },
+                error: function (data) {
+                    HideLoader();
+                    $("#RoutineErrorMessage").text(JSON.stringify(data)).show();
+                }
+            });
+
+        }
+
+
+    })
+</script>
