@@ -1,1 +1,217 @@
-﻿Workout Session here
+﻿@using Newtonsoft.Json;
+@model WT_WebMVCApp.Models.WorkoutSessionVM
+
+@{
+    ViewData["Title"] = "Workout Session";
+
+    var ExerciseGrouped = Model.ConcreteExercises.GroupBy(ex => ex.Category);
+}
+
+<div class="row pl-4">
+    <div class="col-md-12 text-center">
+        <h2>
+            Session for day: <strong>@Model.Date</strong>
+        </h2>
+        <input type="hidden" id="sessionId" value="@Model.ID" />
+    </div>
+</div>
+
+
+<script>
+    var userSession = {};
+    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))'
+    userSession = JSON.parse(serializedModel);
+    var userExercises = userSession.ConcreteExercises;
+</script>
+
+
+@foreach (var group in ExerciseGrouped)
+{
+    var category = group.Key;
+    var ExerciseCategoryNumber = (int)category;
+    var ExerciseCategory = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(category.ToString().ToLower());
+
+    <div class="row mb-2 pl-4">
+        <div class="col-md-12">
+            <h2 data-CategoryNumber="@ExerciseCategoryNumber">
+                @ExerciseCategory
+            </h2>
+        </div>
+
+        @foreach (var exercise in group)
+        {
+            <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="card text-secondary bg-light o-hidden h-100">
+                    <div class="card-body">
+                        <div class="card-body-icon">
+                            <img style="height:100px;width:100px" class="rounded-circle img-responsive" src="@exercise.ImagePath" />
+                        </div>
+
+                        <div class="row mr-5 mt-2">
+                            <div class="col-md-12">
+                                <h3 class="text-capitalize text-center">@exercise.Name</h3>
+                                <hr />
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <form id="exerciseForm-@exercise.ID" asp-antiforgery="true">
+                                    @foreach (var attribute in exercise.Attributes)
+                                    {
+                                        <div class="row mb-2 AttributeInstance">
+                                            <input type="hidden" class="AttributeId" value="@attribute.ID" />
+                                            <input type="hidden" class="AttributeDeletable" value="@attribute.IsDeletable.ToString()">
+                                            <div class="col-md-6 pt-0 text-right">
+                                                <span class="badge badge-pill badge-secondary AttributeName">
+                                                    @attribute.AttributeName
+                                                </span>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <input type="text" class="form-control form-control-sm AttributeValue" value="@attribute.AttributeValue" style="text-align: center; font-weight:900;" readonly>
+                                            </div>
+                                        </div>
+
+                                    }
+                                </form>
+                            </div>
+                        </div>
+                        <div class="p-3 mb-2 bg-danger text-white" id="ErrorMessage" style="display:none"></div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-sm btn-danger deleteExercise" data-toggle="tooltip" data-placement="top" title="Delete Exercise" data-exerciseId="@exercise.ID">
+                            Delete <i class="fa fa-times"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-warning editExercise" data-toggle="tooltip" data-placement="top" title="Edit Exercise" data-exerciseId="@exercise.ID">
+                            Edit <i class="fa fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-success updateExercise" data-toggle="tooltip" data-placement="top" title="Save Exercise" data-exerciseId="@exercise.ID" style="display:none">
+                            Update <i class="fa fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+}
+
+@Html.Partial("_DeleteConcreteExerciseModal.cshtml")
+
+@section Scripts
+    {
+    <script>
+        $(function () {
+
+            $(".deleteExercise").show();
+            $(".editExercise").show();
+            $(".updateExercise").hide();
+
+            //when focusing input select its value for theu ser to easily edit it
+            var focusedElement;
+            $(document).on('focus', '.AttributeValue', function () {
+                if (focusedElement == this) {
+                    return; //already focused, return so user can now place cursor at specific point in input.
+                }
+                else {
+                    focusedElement = this;
+                    setTimeout(function () {
+                        focusedElement.select();
+                    }, 50);
+                }
+            });
+
+
+            $(".editExercise").on("click", function () {
+                var parent = $(this).closest('.card');
+                var inputFields = $(parent).find(".AttributeValue");
+                $(inputFields).attr("readonly", false);
+                $(inputFields).first().focus();
+
+
+                $(parent).find(".deleteExercise").hide();
+                $(parent).find(".editExercise").hide();
+                $(parent).find(".updateExercise").show();
+            });
+
+            $(".updateExercise").on("click", function () {
+                $(this).tooltip('hide');
+                var exerciseId = $(this).attr("data-exerciseId");
+                var sessionId = $("#sessionId").val();
+                var formId = "exerciseForm-" + exerciseId;
+                var parent = $(this).closest('.card');
+                $("#ErrorMessage").hide();
+
+                var form = $("#" + formId);
+                //we add the form in the constructor for the AntiForgery Token to be added in the form data
+                var data = new FormData(form.get(0));
+
+                var attributes = [];
+                var attributeInstances = $(parent).find(".AttributeInstance");
+                $.each(attributeInstances, function (index,item) {
+                    var attrName = $(item).find(".AttributeName").text().trim();
+                    var attrValue = $(item).find(".AttributeValue").val();
+                    var isDeletable = $(item).find(".AttributeDeletable").val();
+
+                    var attributeObject = {
+                        ID: $(item).find(".AttributeId").val(),
+                        AttributeName: attrName,
+                        AttributeValue: attrValue,
+                        IsDeletable: isDeletable
+                    }
+                    attributes.push(attributeObject);
+                });
+
+                data.append("ID", exerciseId);
+                data.append("WorkoutSessionID", sessionId);
+                data.append("AttributesSerialized", JSON.stringify(attributes));
+
+                ShowLoader(formId);
+
+                var url = '@Url.Action("UpdateConcreteExerciseAttributes", "WorkoutSession")';
+
+                jQuery.ajax({
+                    url: url,
+                    data: data,
+                    cache: false,
+                    contentType: false, //needed for setting to multipart..
+                    processData: false, //needed for sending files not to be serialized to string..
+                    method: 'POST',
+                    success: function (data) {
+                        HideLoader();
+                        $(".deleteExercise").show();
+                        $(".editExercise").show();
+                        $(".updateExercise").hide();
+                        var inputFields = $(parent).find(".AttributeValue");
+                        $(inputFields).attr("readonly", true);
+                    },
+                    error: function (data) {
+                        HideLoader();
+                        $("#ErrorMessage").text(JSON.stringify(data)).show();
+                    }
+                    });
+            });
+
+
+            $(".deleteExercise").on("click", function () {
+                //populate the modal
+                var exerciseId = $(this).attr("data-exerciseId");
+                var exercise = userExercises.filter(function (item) {
+                    return item.ID == exerciseId;
+                })[0];
+
+                $("#del-ExerciseId").val(exercise.ID);
+                $("#del-SessionId").val(userSession.ID);
+                $("#del-Name").val(exercise.Name);
+                $("#del-previewImage").attr("src", exercise.ImagePath).show();
+                $("#del-ErrorMessage").hide();
+
+                $("#del-ExerciseModal").modal("show");
+            });
+
+        });
+    </script>
+}
+
+
+
+

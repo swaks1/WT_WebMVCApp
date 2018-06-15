@@ -77,34 +77,37 @@
                                         var currentRow = 1;
                                         while (currentRow <= maxRow)
                                         {
-                                            <tr>
-                                                @foreach (var group in ExerciseGrouped)
+                                    <tr>
+                                        @foreach (var group in ExerciseGrouped)
+                                        {
+                                            var groupRow = 1;
+                                            var exist = false;
+                                            foreach (var exercise in group)
+                                            {
+                                                if (groupRow == currentRow)
                                                 {
-                                                    var groupRow = 1;
-                                                    var exist = false;
-                                                    foreach (var exercise in group)
-                                                    {
-                                                        if (groupRow == currentRow)
-                                                        {
-                                                            exist = true;
-                                                            <td class="exerciseEntry2" data-exerciseId="@exercise.ID">
-                                                                <div>
-                                                                    <span>@exercise.Name</span> &nbsp;
-                                                                    <img style="width:45px; height:45px" src="@exercise.ImagePath" class="img-responsive" />
-                                                                </div>
-                                                            </td>
-                                                        }
-                                                        groupRow++;
-                                                    }
-                                                    if (!exist)
-                                                    {
-                                                        <td></td>
-
-                                                    }
-
-
+                                                    exist = true;
+                                                    <td class="exerciseEntry2" data-exerciseId="@exercise.ID">
+                                                        <div>
+                                                            <span>@exercise.Name</span> &nbsp;
+                                                            <img style="width:45px; height:45px" src="@exercise.ImagePath" class="img-responsive" />
+                                                        </div>
+                                                    </td>
                                                 }
-                                            </tr>
+                                                groupRow++;
+                                            }
+                                            if (!exist)
+                                            {
+                                                <td>
+                                                    <!--should be empty but for the sorting to be correct added 'z' so this column will be last-->
+                                                    <span style="display:none">z</span>
+                                                </td>
+
+                                            }
+
+
+                                        }
+                                    </tr>
                                             currentRow++;
                                         }
 

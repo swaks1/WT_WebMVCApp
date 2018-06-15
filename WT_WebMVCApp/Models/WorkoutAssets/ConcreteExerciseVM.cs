@@ -26,6 +26,7 @@ namespace WT_WebMVCApp.Models
         public int? WorkoutSessionID { get; set; }
 
         public ICollection<ConcreteExerciseAttributeVM> Attributes { get; set; }
+        public string AttributesSerialized { get; set; }
 
     }
 }

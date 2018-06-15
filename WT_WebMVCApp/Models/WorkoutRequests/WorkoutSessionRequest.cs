@@ -18,5 +18,7 @@ namespace WT_WebMVCApp.Models
         public List<ExerciseVM> Exercises { get; set; }
 
         public List<ConcreteExerciseVM> ConcreteExercises { get; set; }
+
+        public UserVM User { get; set; }
     }
 }
