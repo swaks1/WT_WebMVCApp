@@ -5,6 +5,9 @@
     ViewData["Title"] = "Workout Session";
 
     var ExerciseGrouped = Model.ConcreteExercises.GroupBy(ex => ex.Category);
+
+    var Routines = (List<WT_WebMVCApp.Models.WorkoutRoutineVM>)ViewData["Routines"];
+
 }
 
 <div class="row pl-4">
@@ -16,12 +19,27 @@
     </div>
 </div>
 
+<div class="row pl-4">
+    <div class="col-md-12 mb-5">
+        <button type="button" class="btn btn-primary btn-sm" id="addExercises" data-toggle="tooltip" data-placement="top" title="Add Exercises">
+            Add Exercises <img src="~/icons/barbell-24.png" />
+        </button>
+
+        <button type="button" class="btn btn-warning btn-sm ml-3" id="addRoutines" data-toggle="tooltip" data-placement="top" title="Add Routine">
+            Add Routines  <img src="~/icons/routine.png" />
+        </button>
+    </div>
+</div>
+
 
 <script>
     var userSession = {};
-    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))'
+    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))';
     userSession = JSON.parse(serializedModel);
     var userExercises = userSession.ConcreteExercises;
+    var userRoutines = [];
+    serializedRoutines = '@Html.Raw(JsonConvert.SerializeObject(Routines))';
+    userRoutines = JSON.parse(serializedRoutines);
 </script>
 
 
@@ -30,7 +48,6 @@
     var category = group.Key;
     var ExerciseCategoryNumber = (int)category;
     var ExerciseCategory = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(category.ToString().ToLower());
-
     <div class="row mb-2 pl-4">
         <div class="col-md-12">
             <h2 data-CategoryNumber="@ExerciseCategoryNumber">
@@ -50,6 +67,25 @@
                         <div class="row mr-5 mt-2">
                             <div class="col-md-12">
                                 <h3 class="text-capitalize text-center">@exercise.Name</h3>
+                                @if (exercise.RoutineId != null)
+                                {
+                                    var routine = Routines.FirstOrDefault(item => item.ID == exercise.RoutineId);
+                                    if (routine != null)
+                                    {
+                                        <div class="text-center">
+                                            <span>
+                                                Routine: <strong>@routine.Name</strong>
+                                            </span>
+                                            <button type="button" class="btn btn-sm btn-danger deleteRoutineExercises" style="padding: 1px 2px"
+                                                    data-toggle="tooltip" data-placement="top" title="Delete All Exercises from this routine" data-routineId="@routine.ID">
+
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                        </div>
+
+                                    }
+                                }
+
                                 <hr />
                             </div>
                         </div>
@@ -95,7 +131,10 @@
     </div>
 }
 
+@Html.Partial("_AddExercisesToSessionModal.cshtml")
 @Html.Partial("_DeleteConcreteExerciseModal.cshtml")
+@Html.Partial("_AddRoutinesToSessionModal.cshtml")
+@Html.Partial("_DeleteRoutineExercisesModal.cshtml")
 
 @section Scripts
     {
@@ -107,7 +146,7 @@
             $(".updateExercise").hide();
 
             //when focusing input select its value for theu ser to easily edit it
-            var focusedElement;
+            var focusedElement = null;
             $(document).on('focus', '.AttributeValue', function () {
                 if (focusedElement == this) {
                     return; //already focused, return so user can now place cursor at specific point in input.
@@ -177,18 +216,24 @@
                     processData: false, //needed for sending files not to be serialized to string..
                     method: 'POST',
                     success: function (data) {
-                        HideLoader();
-                        $(".deleteExercise").show();
-                        $(".editExercise").show();
-                        $(".updateExercise").hide();
-                        var inputFields = $(parent).find(".AttributeValue");
-                        $(inputFields).attr("readonly", true);
+                        if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
+                            HideLoader();
+                            $(".deleteExercise").show();
+                            $(".editExercise").show();
+                            $(".updateExercise").hide();
+                            var inputFields = $(parent).find(".AttributeValue");
+                            $(inputFields).attr("readonly", true);                                
+                        }
+                        else {
+                            HideLoader();
+                            $("#ErrorMessage").text(JSON.stringify(data)).show();
+                        }
                     },
                     error: function (data) {
                         HideLoader();
                         $("#ErrorMessage").text(JSON.stringify(data)).show();
                     }
-                    });
+                });
             });
 
 
@@ -207,6 +252,52 @@
 
                 $("#del-ExerciseModal").modal("show");
             });
+
+
+            $(document).on("click", "#addExercises", function () {
+                $(this).tooltip('hide');
+
+                var sessionId = userSession.ID;
+                $("#addExerciseModalSessionId").val(sessionId);
+
+                $("#addExerciseModal").modal("show");
+
+            });
+
+
+            $(document).on("click", "#addRoutines", function () {
+                $(this).tooltip('hide');
+
+                var sessionId = userSession.ID;
+                $("#addRoutineModalSessionId").val(sessionId);
+
+                $("#addRoutineModal").modal("show");
+
+            });
+
+            $(document).on("click", ".deleteRoutineExercises", function () {
+                $(this).tooltip('hide');
+
+                var sessionId = userSession.ID;
+
+                var routineId = $(this).attr("data-routineId");
+                var routine = userRoutines.filter(function (item) {
+                    return item.ID == routineId;
+                })[0];
+
+                $("#delRout-SessionId").val(sessionId);
+                $("#delRout-RoutineId").val(routineId);
+
+                $("#delRout-Name").val(routine.Name);
+                $("#delRout-previewImage").attr("src", routine.ImagePath).show();
+                $("#delRout-ErrorMessage").hide();
+
+                $("#delRoutModal").modal("show");
+
+            });
+
+
+
 
         });
     </script>

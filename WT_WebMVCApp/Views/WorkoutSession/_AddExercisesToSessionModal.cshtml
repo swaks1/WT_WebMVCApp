@@ -1,0 +1,170 @@
+﻿<!-- Showed and initailzed from Index view-->
+@{
+    var Exercises = (List<WT_WebMVCApp.Models.ExerciseVM>)ViewData["Exercises"];
+    var ExerciseGrouped = Exercises.GroupBy(ex => ex.Category);
+}
+<div class="modal fade" id="addExerciseModal" tabindex="-1" role="dialog" aria-labelledby="addExerciseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addExerciseModalLabel">Add Exercises to Session </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addExercisesForm" asp-antiforgery="true">
+                    <input type="hidden" id="addExerciseModalSessionId" value="0" />
+
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="exerciseTable3" style="width:100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            @foreach (var group in ExerciseGrouped)
+                                            {
+                                                var category = group.Key;
+                                                var ExerciseCategory = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(category.ToString().ToLower());
+
+                                                <th>@ExerciseCategory</th>
+                                            }
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Code to insert into table... find total rows than iterate and in each row add from each group-->
+                                        @{
+                                            var maxRow = ExerciseGrouped
+                                                .OrderByDescending(grp => grp.Count())
+                                                .First()
+                                                .Count();
+
+                                            var currentRow = 1;
+                                            while (currentRow <= maxRow)
+                                            {
+                                                <tr>
+                                                    @foreach (var group in ExerciseGrouped)
+                                                    {
+                                                        var groupRow = 1;
+                                                        var exist = false;
+                                                        foreach (var exercise in group)
+                                                        {
+                                                            if (groupRow == currentRow)
+                                                            {
+                                                                exist = true;
+                                                                <td class="exerciseEntry" data-exerciseId="@exercise.ID">
+                                                                    <div>
+                                                                        <span>@exercise.Name</span> &nbsp;
+                                                                        <img style="width:45px; height:45px" src="@exercise.ImagePath" class="img-responsive" />
+                                                                    </div>
+                                                                </td>
+                                                            }
+                                                            groupRow++;
+                                                        }
+                                                        if (!exist)
+                                                        {
+                                                            <td> <!--should be empty but for the sorting to be correct added 'z' so this column will be last-->
+                                                                <span style="display:none">z</span>
+                                                            </td>
+
+                                                        }
+
+
+                                                    }
+                                                </tr>
+                                                currentRow++;
+                                            }
+
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="p-3 mb-2 bg-danger text-white" id="addExerciseModalErrorMessage" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="addExerciseModalSaveButton">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .modal-lg {
+        max-width: 1200px;
+    }
+
+    .exerciseEntry:hover {
+        cursor: pointer;
+        border-top: 3px solid black;
+    }
+
+    .selectedExercise {
+        background-color: darkseagreen;
+        font-weight: 700;
+    }
+</style>
+
+<script>
+
+    $(function () {
+
+        $('#exerciseTable3').DataTable();
+
+        $(document).on("click", ".exerciseEntry", function () {
+            $(this).toggleClass("selectedExercise");
+        });
+
+        $("#addExerciseModalSaveButton").click(function () {
+            var url = '@Url.Action("SaveExercisesForSession", "WorkoutSession")';
+            var form = $("#addExercisesForm");
+            //we add the form in the constructor for the AntiForgery Token to be added in the form data
+            var data = new FormData(form.get(0));
+
+            var id = $("#addExerciseModalSessionId").val();
+            data.append("ID", id);
+
+            var exerciseIDs = [];
+                $.each($(".selectedExercise"), function (index, item) {
+                    var id = $(item).attr("data-exerciseId");
+                    exerciseIDs.push(id);
+            });
+
+            data.append("SerializedExerciseIds", JSON.stringify(exerciseIDs));
+
+            ShowLoader("modal-content");
+
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false, //needed for setting to multipart
+                processData: false,
+                method: 'POST',
+                success: function (data) {
+
+                    if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
+                        window.location = '@Url.Action("Index", "WorkoutSession")';
+                    }
+                    else {
+                        HideLoader();
+                        $("#addExerciseModalErrorMessage").text(JSON.stringify(data)).show();
+                    }
+                        
+                },
+                error: function (data) {
+                    HideLoader();
+                    $("#addExerciseModalErrorMessage").text(JSON.stringify(data)).show();
+                }
+            });
+
+        })
+    })
+</script>

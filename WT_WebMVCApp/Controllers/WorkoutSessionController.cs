@@ -31,11 +31,53 @@ namespace WT_WebMVCApp.Controllers
             var sessionRequest = new WorkoutSessionRequest { User = UserVM, CurrentDate = DateTime.Now };
 
             var response = await _workoutTrackerService.GetSessionForDay(sessionRequest);
-
             //set image path relative to api's URL ... 
             response.ViewModel.ConcreteExercises.ToList().ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
 
+            //Get exercises for the user
+            var exercisesResposne = await _workoutTrackerService.GetExercisesForUser(UserVM);
+            //set image path relative to api's URL ... 
+            exercisesResposne.ViewModel.ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
+            ViewData["Exercises"] = exercisesResposne.ViewModel;
+
+            //Get routines for the user
+            var routineResponse = await _workoutTrackerService.GetRoutinesForUser(UserVM);
+            //set image path relative to api's URL ... 
+            routineResponse.ViewModel.ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
+            routineResponse.ViewModel.ForEach(item => item.Exercises.ToList()
+                                                            .ForEach(img => img.ImagePath = WorkotTrackerHelper.ApiUrl + img.ImagePath));
+            ViewData["Routines"] = routineResponse.ViewModel;
+
             return View(response.ViewModel);
+        }
+        
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveExercisesForSession([FromForm] WorkoutSessionRequest workoutSessionRequest)
+        {
+            workoutSessionRequest.CurrentDate = DateTime.Now;
+            workoutSessionRequest.Exercises = new List<ExerciseVM>();
+            var exerciseIDs = JsonConvert.DeserializeObject<List<int>>(workoutSessionRequest.SerializedExerciseIds);
+            exerciseIDs.ForEach(item => workoutSessionRequest.Exercises.Add(new ExerciseVM { ID = item }));
+
+            var response = await _workoutTrackerService.SaveExercisesForSession(workoutSessionRequest);
+
+            return Json(response);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveRoutinesForSession([FromForm] WorkoutSessionRequest workoutSessionRequest)
+        {
+            workoutSessionRequest.CurrentDate = DateTime.Now;
+            workoutSessionRequest.Routines = new List<WorkoutRoutineVM>();
+            var routineIDs = JsonConvert.DeserializeObject<List<int>>(workoutSessionRequest.SerializedRoutineIds);
+            routineIDs.ForEach(item => workoutSessionRequest.Routines.Add(new WorkoutRoutineVM { ID = item }));
+
+            var response = await _workoutTrackerService.SaveRoutinesForSession(workoutSessionRequest);
+
+            return Json(response);
         }
 
         [HttpPost]
@@ -52,13 +94,22 @@ namespace WT_WebMVCApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConcreteExercise([FromForm] int ID,[FromForm] int sessionId)
+        public async Task<IActionResult> DeleteConcreteExercise([FromForm] int ID, [FromForm] int sessionId)
         {
-            var response = await _workoutTrackerService.DeleteConcreteExercise(ID,sessionId);
+            var response = await _workoutTrackerService.DeleteConcreteExercise(ID, sessionId);
 
             return Json(response);
         }
 
-        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConcreteExercisesFromRoutine([FromForm] int ID, [FromForm] int sessionId)
+        {
+            var response = await _workoutTrackerService.DeleteConcreteExercisesFromRoutine(ID, sessionId);
+
+            return Json(response);
+        }
+
+
     }
 }

@@ -123,6 +123,19 @@
             $(document).on("click", "#addNewRoutine", function () {
                 $(this).tooltip('hide');
 
+                $("#RoutineId").val("0"); //hidden field in the modal
+                $("#RoutineModalLabel").text("Add Routine");
+                $("#Name").val("");
+                $("#Description").val("");
+                $("#previewImage").attr("src", "").hide();
+                $("#RoutineErrorMessage").hide();
+                $("label.error").hide();
+
+
+                $.each($(".exerciseEntry2"), function (index, item) {
+                    $(item).removeClass("selectedExercise2");
+                });
+
                 $("#addExercisesBtn").show();
                 $("#exerciseTable2_wrapper").hide();
 

@@ -232,6 +232,45 @@ namespace WT_WebMVCApp.Services
             });
         }
 
+        public async Task<WTServiceResponse<string>> SaveExercisesForSession(WorkoutSessionRequest workoutSessionRequest)
+        {
+            // serialize it
+            var serializedRequest = JsonConvert.SerializeObject(workoutSessionRequest);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PostAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/CreateOrUpdate",
+                                                new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
+
+        public async Task<WTServiceResponse<string>> SaveRoutinesForSession(WorkoutSessionRequest workoutSessionRequest)
+        {
+            // serialize it
+            var serializedRequest = JsonConvert.SerializeObject(workoutSessionRequest);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PostAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/CreateOrUpdate",
+                                                new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
 
         public async Task<WTServiceResponse<string>> UpdateConcreteExerciseAttributes(ConcreteExerciseVM exercise)
         {
@@ -265,6 +304,27 @@ namespace WT_WebMVCApp.Services
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
             var response = await httpClient.PostAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/session/{sessionId}/DeleteConcreteExercises",
+                            new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
+
+        public async Task<WTServiceResponse<string>> DeleteConcreteExercisesFromRoutine(int routineId, int sessionId)
+        {
+            var request = new List<int>();
+            request.Add(routineId);
+            var serializedRequest = JsonConvert.SerializeObject(request);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PostAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/session/{sessionId}/DeleteConcreteExercisesFromRoutine",
                             new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -335,6 +395,8 @@ namespace WT_WebMVCApp.Services
                     }
             }
         }
+
+
 
         #endregion
 

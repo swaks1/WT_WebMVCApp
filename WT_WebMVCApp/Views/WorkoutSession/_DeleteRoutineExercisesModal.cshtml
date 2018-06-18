@@ -1,37 +1,37 @@
 ﻿<!--This gets populated in WorkoutExercises-Index view -->
 
 
-<div class="modal fade" id="del-ExerciseModal" tabindex="-1" role="dialog" aria-labelledby="del-ExerciseModalLabel" aria-hidden="true">
+<div class="modal fade" id="delRoutModal" tabindex="-1" role="dialog" aria-labelledby="delRoutModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">        
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="del-ExerciseModalLabel">Delete Exercise ? </h5>
+                <h5 class="modal-title" id="delRoutModalLabel">Delete All Exercises added from this rotuine ? </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="del-ExerciseForm" asp-antiforgery="true">
+                <form id="delRout-Form" asp-antiforgery="true">
                     <div class="row mb-3">
                         <div class="col-md-3 text-left">
                             <label for="del-Name" class="form-label mr-1">Name:</label>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="del-Name" readonly> 
-                            <input type="hidden" id="del-ExerciseId">
-                            <input type="hidden" id="del-SessionId">
+                            <input type="text" class="form-control" id="delRout-Name" readonly>
+                            <input type="hidden" id="delRout-RoutineId">
+                            <input type="hidden" id="delRout-SessionId">
                         </div>
                         <div class="col-md-3">
-                                <img class="img-responsive rounded-circle" id="del-previewImage" alt="Image for Exercise" width="100" height="100" />
+                                <img class="img-responsive rounded-circle" id="delRout-previewImage" alt="Image for Routine" width="100" height="100" />
                         </div>
                     </div>
                 </form>
 
-                <div class="p-3 mb-2 bg-danger text-white" id="del-ErrorMessage" style="display:none"></div>
+                <div class="p-3 mb-2 bg-danger text-white" id="delRout-ErrorMessage" style="display:none"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" id="del-ExerciseBtn">Delete exercise</button>
+                <button type="button" class="btn btn-danger" id="delRout-Btn">Delete All Exercises From this Routine</button>
             </div>
         </div>
     </div>
@@ -39,16 +39,16 @@
 
 <script>
     $(function () {
-        $("#del-previewImage").hide();
+        $("#delRout-previewImage").hide();
 
-        $("#del-ExerciseBtn").click(function () {
-            var url = '@Url.Action("DeleteConcreteExercise", "WorkoutSession")';
-            var form = $("#del-ExerciseForm");
+        $("#delRout-Btn").click(function () {
+            var url = '@Url.Action("DeleteConcreteExercisesFromRoutine", "WorkoutSession")';
+            var form = $("#delRout-Form");
             //we add the form in the constructor for the AntiForgery Token to be added in the form data
             var data = new FormData(form.get(0)); 
 
-            var id = $("#del-ExerciseId").val();
-            var sessionId = $("#del-SessionId").val();
+            var id = $("#delRout-RoutineId").val();
+            var sessionId = $("#delRout-SessionId").val();
 
             data.append("ID", id);
             data.append("sessionId", sessionId);
@@ -69,13 +69,13 @@
                     }
                     else {
                         HideLoader();
-                        $("#del-ErrorMessage").text(JSON.stringify(data)).show();
+                        $("#delRout-ErrorMessage").text(JSON.stringify(data)).show();
                     }
                    
                 },
                 error: function (data) {
                     HideLoader();
-                    $("#del-ErrorMessage").text(JSON.stringify(data)).show();
+                    $("#delRout-ErrorMessage").text(JSON.stringify(data)).show();
                 }
             });
 

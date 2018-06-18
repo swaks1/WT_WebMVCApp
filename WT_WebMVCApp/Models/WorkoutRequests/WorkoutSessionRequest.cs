@@ -20,5 +20,12 @@ namespace WT_WebMVCApp.Models
         public List<ConcreteExerciseVM> ConcreteExercises { get; set; }
 
         public UserVM User { get; set; }
+
+        public int ID { get; set; }
+
+        public string SerializedExerciseIds { get; set; }
+
+        public string SerializedRoutineIds { get; set; }
+        
     }
 }

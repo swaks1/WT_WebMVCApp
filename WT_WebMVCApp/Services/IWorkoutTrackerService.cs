@@ -34,6 +34,9 @@ namespace WT_WebMVCApp.Services
         Task<WTServiceResponse<WorkoutSessionVM>> GetSessionForDay(WorkoutSessionRequest workoutSessionRequest);
         Task<WTServiceResponse<string>> UpdateConcreteExerciseAttributes(ConcreteExerciseVM exercise);
         Task<WTServiceResponse<string>> DeleteConcreteExercise(int exerciseId, int sessionId);
+        Task<WTServiceResponse<string>> SaveExercisesForSession(WorkoutSessionRequest workoutSessionRequest);
+        Task<WTServiceResponse<string>> SaveRoutinesForSession(WorkoutSessionRequest workoutSessionRequest);
+        Task<WTServiceResponse<string>> DeleteConcreteExercisesFromRoutine(int routineId, int sessionId);
         //Task<WTServiceResponse<WorkoutRoutineVM>> AddRoutine(WorkoutRoutineVM routine);
         //Task<WTServiceResponse<string>> SaveRoutine(WorkoutRoutineVM routine);
         //Task<WTServiceResponse<string>> DeleteRoutine(int iD);
