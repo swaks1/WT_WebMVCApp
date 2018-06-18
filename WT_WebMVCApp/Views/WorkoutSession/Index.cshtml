@@ -19,6 +19,25 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-md-4">
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="display:none" id="successAlert">
+            <strong>Successfully Added !</strong> You can check below.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div class="alert alert-info alert-dismissible fade show" role="alert" style="display:none" id="infoAlert">
+            <strong>Successfully Deleted !</strong> You can check below.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
 <div class="row pl-4">
     <div class="col-md-12 mb-5">
         <button type="button" class="btn btn-primary btn-sm" id="addExercises" data-toggle="tooltip" data-placement="top" title="Add Exercises">
@@ -144,6 +163,19 @@
             $(".deleteExercise").show();
             $(".editExercise").show();
             $(".updateExercise").hide();
+
+
+            //show alert if set in session
+            if (sessionStorage.showSuccessAlert == 'true') {
+                $("#successAlert").show('slow');
+                sessionStorage.showSuccessAlert = false;
+            }
+
+            //show alert if set in session
+            if (sessionStorage.showInfoAlert == 'true') {
+                $("#infoAlert").show('slow');
+                sessionStorage.showInfoAlert = false;
+            }
 
             //when focusing input select its value for theu ser to easily edit it
             var focusedElement = null;

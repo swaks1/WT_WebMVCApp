@@ -2,7 +2,7 @@
 
 
 <div class="modal fade" id="del-ExerciseModal" tabindex="-1" role="dialog" aria-labelledby="del-ExerciseModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">        
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="del-ExerciseModalLabel">Delete Exercise ? </h5>
@@ -17,12 +17,12 @@
                             <label for="del-Name" class="form-label mr-1">Name:</label>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" id="del-Name" readonly> 
+                            <input type="text" class="form-control" id="del-Name" readonly>
                             <input type="hidden" id="del-ExerciseId">
                             <input type="hidden" id="del-SessionId">
                         </div>
                         <div class="col-md-3">
-                                <img class="img-responsive rounded-circle" id="del-previewImage" alt="Image for Exercise" width="100" height="100" />
+                            <img class="img-responsive rounded-circle" id="del-previewImage" alt="Image for Exercise" width="100" height="100" />
                         </div>
                     </div>
                 </form>
@@ -45,7 +45,7 @@
             var url = '@Url.Action("DeleteConcreteExercise", "WorkoutSession")';
             var form = $("#del-ExerciseForm");
             //we add the form in the constructor for the AntiForgery Token to be added in the form data
-            var data = new FormData(form.get(0)); 
+            var data = new FormData(form.get(0));
 
             var id = $("#del-ExerciseId").val();
             var sessionId = $("#del-SessionId").val();
@@ -65,13 +65,14 @@
                 success: function (data) {
                     //HideLoader();
                     if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
-                         window.location = '@Url.Action("Index", "WorkoutSession")';
+                        sessionStorage.showInfoAlert = true;
+                        window.location = '@Url.Action("Index", "WorkoutSession")';
                     }
                     else {
                         HideLoader();
                         $("#del-ErrorMessage").text(JSON.stringify(data)).show();
                     }
-                   
+
                 },
                 error: function (data) {
                     HideLoader();

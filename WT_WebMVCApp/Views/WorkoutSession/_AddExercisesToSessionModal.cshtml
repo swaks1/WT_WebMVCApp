@@ -151,6 +151,7 @@
                 success: function (data) {
 
                     if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
+                        sessionStorage.showSuccessAlert = true
                         window.location = '@Url.Action("Index", "WorkoutSession")';
                     }
                     else {

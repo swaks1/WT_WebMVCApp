@@ -65,7 +65,8 @@
                 success: function (data) {
                     //HideLoader();
                     if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
-                         window.location = '@Url.Action("Index", "WorkoutSession")';
+                        sessionStorage.showInfoAlert = true; 
+                        window.location = '@Url.Action("Index", "WorkoutSession")';
                     }
                     else {
                         HideLoader();
