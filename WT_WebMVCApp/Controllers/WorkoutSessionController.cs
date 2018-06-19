@@ -25,10 +25,19 @@ namespace WT_WebMVCApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string queryDate)
         {
+            var currentDate = DateTime.Now;
+            if(queryDate != null)
+            {
+                DateTime parsedDate;
+                if(DateTime.TryParse(queryDate, out parsedDate))
+                {
+                    currentDate = parsedDate;
+                }
+            }
             var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
-            var sessionRequest = new WorkoutSessionRequest { User = UserVM, CurrentDate = DateTime.Now };
+            var sessionRequest = new WorkoutSessionRequest { User = UserVM, CurrentDate = currentDate };
 
             var response = await _workoutTrackerService.GetSessionForDay(sessionRequest);
             //set image path relative to api's URL ... 
@@ -56,7 +65,6 @@ namespace WT_WebMVCApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveExercisesForSession([FromForm] WorkoutSessionRequest workoutSessionRequest)
         {
-            workoutSessionRequest.CurrentDate = DateTime.Now;
             workoutSessionRequest.Exercises = new List<ExerciseVM>();
             var exerciseIDs = JsonConvert.DeserializeObject<List<int>>(workoutSessionRequest.SerializedExerciseIds);
             exerciseIDs.ForEach(item => workoutSessionRequest.Exercises.Add(new ExerciseVM { ID = item }));
@@ -70,7 +78,6 @@ namespace WT_WebMVCApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveRoutinesForSession([FromForm] WorkoutSessionRequest workoutSessionRequest)
         {
-            workoutSessionRequest.CurrentDate = DateTime.Now;
             workoutSessionRequest.Routines = new List<WorkoutRoutineVM>();
             var routineIDs = JsonConvert.DeserializeObject<List<int>>(workoutSessionRequest.SerializedRoutineIds);
             routineIDs.ForEach(item => workoutSessionRequest.Routines.Add(new WorkoutRoutineVM { ID = item }));

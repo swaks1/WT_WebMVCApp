@@ -52,6 +52,7 @@
 
             data.append("ID", id);
             data.append("sessionId", sessionId);
+            data.append("CurrentDate", userSession.Date);
 
             ShowLoader("modal-content");
 
@@ -66,7 +67,7 @@
                     //HideLoader();
                     if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
                         sessionStorage.showInfoAlert = true;
-                        window.location = '@Url.Action("Index", "WorkoutSession")';
+                        window.location = '@Url.Action("Index", "WorkoutSession")'+ "?queryDate=" + userSession.Date.substring(0,10);
                     }
                     else {
                         HideLoader();

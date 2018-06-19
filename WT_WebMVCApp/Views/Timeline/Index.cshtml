@@ -1,0 +1,147 @@
+﻿@using Newtonsoft.Json;
+@model List<WorkoutSessionVM>
+
+<link href="~/lib/fullcalendar/dist/fullcalendar.css" rel="stylesheet" />
+<script src="~/lib/moment/min/moment.min.js"></script>
+<script src="~/lib/fullcalendar/dist/fullcalendar.js"></script>
+
+
+@{
+    ViewData["Title"] = "Workout Timeline";
+}
+
+<script>
+    var userSessions = [];
+    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))';
+    userSessions = JSON.parse(serializedModel);
+    console.log(userSessions);
+</script>
+
+
+
+
+<div class="row pl-4">
+    <div class="col-md-12 text-center">
+        <h2>
+            Timeline
+        </h2>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-9 mx-auto">
+        <div id='calendar'></div>
+    </div>
+</div>
+
+
+
+
+@section Scripts{
+    <script>
+        $(function () {
+
+            var dayClickFunction = function (date) {
+                var date = date.toISOString();
+                window.location = '@Url.Action("Index", "WorkoutSession")' + "?queryDate=" + date;
+            };
+
+            var eventRenderFunction = function (event, eventElement) {
+                if (event.categories != null) {
+                    event.categories.forEach(function (category) {
+                        var imageUrl = "icons/categories/" + category + ".png";
+                        eventElement.prepend("<img src='" + imageUrl + "' class='timelineCategoryIcon' >");
+                    });
+                }
+            }
+
+
+            var eventData = [];
+
+            var dateNow = new Date();
+            $.each(userSessions, function (index, session) {
+
+                var uniqueCategories = [];
+                $.each(session.ConcreteExercises, function (index, exercise) {
+                    if (uniqueCategories.indexOf(exercise.Category) == -1)
+                        uniqueCategories.push(exercise.Category);
+                });
+
+                var sessionDate = new Date(session.Date);
+                var className = dateNow > sessionDate ? "workoutInPast" : "workoutInFuture";
+                if (dateNow.toDateString() === sessionDate.toDateString()) {
+                    className = "workoutToday";
+                }
+
+                var event = {
+                    rendering: 'background'
+                }
+                event.id = session.ID;
+                event.title = "session" + session.ID;
+                event.className = className;
+                event.start = session.Date.substring(0, 10); //"2018-06-17T14:07:06.33"
+                event.categories = uniqueCategories;
+
+                eventData.push(event);
+            })
+
+            console.log(eventData);
+
+            $('#calendar').fullCalendar({
+                fixedWeekCount: false,
+                showNonCurrentDates: false,
+                header: {
+                    left: 'title',
+                    center: '',
+                    right: 'today prev,next'
+                },
+                events: eventData,
+                selectable: true,
+                dayClick: dayClickFunction,
+                eventRender: eventRenderFunction
+            });
+
+        });
+    </script>
+}
+
+
+<style>
+    .workoutInPast {
+        background-color: #b3ffcc;
+        color: white !important;
+    }
+
+    .workoutInFuture {
+        background-color: #ffad99;
+        color: white !important;
+    }
+
+    .workoutToday {
+        background-color: #66d9ff;
+        color: white !important;
+    }
+
+    .fc-body {
+        cursor: pointer;
+    }
+
+    .timelineCategoryIcon {
+        width: 20px;
+        height: 20px;
+    }
+
+    @@media (min-width: 1400px) {
+        .timelineCategoryIcon {
+            width: 35px;
+            height: 35px;
+        }
+    }
+
+    @@media (min-width: 1700px) {
+        .timelineCategoryIcon {
+            width: 50px;
+            height: 50px;
+        }
+    }
+</style>

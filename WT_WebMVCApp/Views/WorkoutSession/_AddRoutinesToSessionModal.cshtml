@@ -119,6 +119,7 @@
 
             var id = $("#addRoutineModalSessionId").val();
             data.append("ID", id);
+            data.append("CurrentDate", userSession.Date);
 
             var routineIDs = [];
                 $.each($(".selectedRoutine"), function (index, item) {
@@ -141,7 +142,7 @@
 
                     if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
                         sessionStorage.showSuccessAlert = true;
-                        window.location = '@Url.Action("Index", "WorkoutSession")';
+                        window.location = '@Url.Action("Index", "WorkoutSession")'+ "?queryDate=" + userSession.Date.substring(0,10);
                     }
                     else {
                         HideLoader();

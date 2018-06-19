@@ -10,12 +10,24 @@
 
 }
 
+<script>
+    var userSession = {};
+    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))';
+    userSession = JSON.parse(serializedModel);
+    var userExercises = userSession.ConcreteExercises;
+    var userRoutines = [];
+    serializedRoutines = '@Html.Raw(JsonConvert.SerializeObject(Routines))';
+    userRoutines = JSON.parse(serializedRoutines);
+</script>
+
+
 <div class="row pl-4">
     <div class="col-md-12 text-center">
         <h2>
             Session for day: <strong>@Model.Date</strong>
         </h2>
         <input type="hidden" id="sessionId" value="@Model.ID" />
+        <input type="hidden" id="sessionDate" value="@Model.Date" />
     </div>
 </div>
 
@@ -50,16 +62,6 @@
     </div>
 </div>
 
-
-<script>
-    var userSession = {};
-    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))';
-    userSession = JSON.parse(serializedModel);
-    var userExercises = userSession.ConcreteExercises;
-    var userRoutines = [];
-    serializedRoutines = '@Html.Raw(JsonConvert.SerializeObject(Routines))';
-    userRoutines = JSON.parse(serializedRoutines);
-</script>
 
 
 @foreach (var group in ExerciseGrouped)
@@ -164,7 +166,6 @@
             $(".editExercise").show();
             $(".updateExercise").hide();
 
-
             //show alert if set in session
             if (sessionStorage.showSuccessAlert == 'true') {
                 $("#successAlert").show('slow');
@@ -254,7 +255,7 @@
                             $(".editExercise").show();
                             $(".updateExercise").hide();
                             var inputFields = $(parent).find(".AttributeValue");
-                            $(inputFields).attr("readonly", true);                                
+                            $(inputFields).attr("readonly", true);
                         }
                         else {
                             HideLoader();

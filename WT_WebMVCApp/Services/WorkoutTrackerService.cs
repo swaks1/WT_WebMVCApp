@@ -276,7 +276,7 @@ namespace WT_WebMVCApp.Services
         {
             var request = new WorkoutSessionRequest { ConcreteExercises = new List<ConcreteExerciseVM>() };
             request.ConcreteExercises.Add(exercise);
-        
+
             // serialize it
             var serializedRequest = JsonConvert.SerializeObject(request);
 
@@ -339,6 +339,39 @@ namespace WT_WebMVCApp.Services
 
         #endregion
 
+
+        #region Timeline
+
+        public async Task<WTServiceResponse<List<WorkoutSessionVM>>> GetSessionsForMonth(UserVM user, int year, int month)
+        {
+            var startDate = new DateTime(year, month, 1);
+            var endDate = startDate.AddMonths(1).AddDays(-1);
+
+            var sessionRequest = new WorkoutSessionRequest { User = user, StartDate = startDate, EndDate = endDate };
+
+            var serializedRequest = JsonConvert.SerializeObject(sessionRequest);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PostAsync($"/api/Sessions/user/{sessionRequest.User.ID}/Sessions",
+                                                new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
+
+
+            return await HandleApiResponse(response, async () =>
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var sessions = JsonConvert.DeserializeObject<List<WorkoutSessionVM>>(content);
+
+                return new WTServiceResponse<List<WorkoutSessionVM>>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = sessions
+                };
+            });
+        }
+
+        #endregion
+
         #region Handle Response Methods (sync and async)
 
         private WTServiceResponse<T> HandleApiResponse<T>(HttpResponseMessage response, Func<WTServiceResponse<T>> onSuccess)
@@ -395,7 +428,6 @@ namespace WT_WebMVCApp.Services
                     }
             }
         }
-
 
 
         #endregion
