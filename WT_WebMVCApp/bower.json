@@ -16,7 +16,6 @@
   ],
   "dependencies": {
     "Font-Awesome": "5.0.13",
-    "jquery.unobtrusive-ajax": "^3.2.5",
-    "fullcalendar": "3.9.0"
+    "jquery.unobtrusive-ajax": "^3.2.5"
   }
 }

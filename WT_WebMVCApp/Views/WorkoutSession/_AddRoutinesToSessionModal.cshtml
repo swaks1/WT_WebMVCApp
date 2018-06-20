@@ -12,70 +12,77 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="addRoutinesForm" asp-antiforgery="true">
-                    <input type="hidden" id="addRoutineModalSessionId" value="0" />
+                <div class="row">
+                    <div class="col-md-12">
 
-                    <div class="row">
-                        @foreach (var routine in Routines)
-                        {
-                            <div class="col-xl-3 col-sm-6 mb-3">
-                                <div class="card border-dark routineEntry" style="width: 18rem;overflow:hidden" data-routineId="@routine.ID">
-                                    <div class="card-body mb-4">
 
-                                        <div class="card-body-icon-square">
-                                            <img style="height:100px;width:100px" class="img-responsive" src="@routine.ImagePath" />
-                                        </div>
+                        <form id="addRoutinesForm" asp-antiforgery="true">
+                            <input type="hidden" id="addRoutineModalSessionId" value="0" />
 
-                                        <h5 class="card-title">@routine.Name</h5>
-                                        <p class="card-text text-muted">@routine.Description</p>
+                            <div class="row">
+                                @foreach (var routine in Routines)
+                                {
+                                    <div class="col-xl-3 col-sm-6 mb-3">
+                                        <div class="card border-dark routineEntry" style="overflow:hidden" data-routineId="@routine.ID">
+                                            <div class="card-body mb-4">
 
-                                    </div>
-
-                                    <div class="text-center">
-                                        <h6>
-                                            Exercises: &nbsp;
-                                        </h6>
-                                    </div>
-                                    <ul class="list-group list-group-flush">
-                                        @foreach (var exercise in routine.Exercises)
-                                        {
-                                            <li class="list-group-item">
-                                                <div class="row">
-                                                    <div class="col-md-10">
-                                                        <span class="text-uppercase font-weight-bold">
-                                                            @exercise.Name
-                                                        </span><br />
-                                                        <span style="font-size:0.7rem">
-                                                            Category: @exercise.Category
-                                                        </span>
-                                                    </div>
-                                                    <div class="col-md-2 p-0 text-center">
-                                                        <img style="height:2.5rem;width:2.5rem" class="rounded-circle img-responsive" src="@exercise.ImagePath" />
-                                                    </div>
+                                                <div class="card-body-icon-square">
+                                                    <img style="height:100px;width:100px" class="img-responsive" src="@routine.ImagePath" />
                                                 </div>
-                                                @*<div class="row">
-                                                        <div class="col-md-12">
-                                                            @foreach (var attribute in exercise.Attributes)
-                                                            {
 
-                                                                <span class="badge badge-light">
-                                                                    @attribute.AttributeName : <span style="font-size:1.1em">@attribute.AttributeValue</span>
+                                                <h5 class="card-title">@routine.Name</h5>
+                                                <p class="card-text text-muted">@routine.Description</p>
+
+                                            </div>
+
+                                            <div class="text-center">
+                                                <h6>
+                                                    Exercises: &nbsp;
+                                                </h6>
+                                            </div>
+                                            <ul class="list-group list-group-flush">
+                                                @foreach (var exercise in routine.Exercises)
+                                                {
+                                                    <li class="list-group-item">
+                                                        <div class="row">
+                                                            <div class="col-md-10">
+                                                                <span class="text-uppercase font-weight-bold">
+                                                                    @exercise.Name
+                                                                </span><br />
+                                                                <span style="font-size:0.7rem">
+                                                                    Category: @exercise.Category
                                                                 </span>
-
-                                                            }
+                                                            </div>
+                                                            <div class="col-md-2 p-0 text-center">
+                                                                <img style="height:2.5rem;width:2.5rem" class="rounded-circle img-responsive" src="@exercise.ImagePath" />
+                                                            </div>
                                                         </div>
+                                                        @*<div class="row">
+                                                                <div class="col-md-12">
+                                                                    @foreach (var attribute in exercise.Attributes)
+                                                                    {
 
-                                                    </div>*@
-                                            </li>
-                                        }
-                                    </ul>
+                                                                        <span class="badge badge-light">
+                                                                            @attribute.AttributeName : <span style="font-size:1.1em">@attribute.AttributeValue</span>
+                                                                        </span>
 
-                                </div>
+                                                                    }
+                                                                </div>
+
+                                                            </div>*@
+                                                    </li>
+                                                }
+                                            </ul>
+
+                                        </div>
+                                    </div>
+                                }
                             </div>
-                        }
-                    </div>
-                </form>
+                        </form>
 
+                    </div>
+
+                </div>
                 <div class="p-3 mb-2 bg-danger text-white" id="addRoutineModalErrorMessage" style="display:none"></div>
             </div>
             <div class="modal-footer">
