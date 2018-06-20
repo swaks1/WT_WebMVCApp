@@ -340,6 +340,111 @@ namespace WT_WebMVCApp.Services
         #endregion
 
 
+        #region Programs
+
+
+        public async Task<WTServiceResponse<List<WorkoutProgramVM>>> GetProgramsForUser(UserVM user)
+        {
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.GetAsync($"/api/Programs/user/{user.ID}");
+
+            return await HandleApiResponse(response, async () =>
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var programs = JsonConvert.DeserializeObject<List<WorkoutProgramVM>>(content);
+
+                return new WTServiceResponse<List<WorkoutProgramVM>>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = programs
+                };
+            });
+        }
+
+        public async Task<WTServiceResponse<WorkoutProgramVM>> AddProgram(WorkoutProgramVM program)
+        {
+            // serialize it
+            var serializedProgram = JsonConvert.SerializeObject(program);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PostAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}",
+                                                new StringContent(serializedProgram, System.Text.Encoding.Unicode, "application/json"));
+
+            return await HandleApiResponse(response, async () =>
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var programVM = JsonConvert.DeserializeObject<WorkoutProgramVM>(content);
+
+                return new WTServiceResponse<WorkoutProgramVM>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = programVM
+                };
+            });
+        }
+
+        public async Task<WTServiceResponse<string>> SaveProgram(WorkoutProgramVM program)
+        {
+            // serialize it
+            var serializedProgram = JsonConvert.SerializeObject(program);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PutAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{program.ID}",
+                                                new StringContent(serializedProgram, System.Text.Encoding.Unicode, "application/json"));
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
+
+        public async Task<WTServiceResponse<string>> DeleteProgram(int id)
+        {
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.DeleteAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{id}");
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
+
+        public async Task<WTServiceResponse<string>> SaveRoutinesForProgram(UpdateRoutinesForProgramModel routinesModel)
+        {
+            // serialize it
+            var serializedRoutines = JsonConvert.SerializeObject(routinesModel.Routines);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PostAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{routinesModel.ID}/routines",
+                                                new StringContent(serializedRoutines, System.Text.Encoding.Unicode, "application/json"));
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
+
+
+        #endregion
+
+
         #region Timeline
 
         public async Task<WTServiceResponse<List<WorkoutSessionVM>>> GetSessionsForMonth(UserVM user, int year, int month)

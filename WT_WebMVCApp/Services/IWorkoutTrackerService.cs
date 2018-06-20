@@ -18,7 +18,6 @@ namespace WT_WebMVCApp.Services
 
         #endregion
 
-
         #region Routines
 
         Task<WTServiceResponse<List<WorkoutRoutineVM>>> GetRoutinesForUser(UserVM userVM);
@@ -38,13 +37,22 @@ namespace WT_WebMVCApp.Services
         Task<WTServiceResponse<string>> SaveRoutinesForSession(WorkoutSessionRequest workoutSessionRequest);
         Task<WTServiceResponse<string>> DeleteConcreteExercisesFromRoutine(int routineId, int sessionId);
 
+        #endregion
+
+        #region Programs
+
+        Task<WTServiceResponse<List<WorkoutProgramVM>>> GetProgramsForUser(UserVM userVM);
+        Task<WTServiceResponse<WorkoutProgramVM>> AddProgram(WorkoutProgramVM program);
+        Task<WTServiceResponse<string>> SaveProgram(WorkoutProgramVM program);
+        Task<WTServiceResponse<string>> DeleteProgram(int iD);
+        Task<WTServiceResponse<string>> SaveRoutinesForProgram(UpdateRoutinesForProgramModel routinesModel);
 
         #endregion
 
         #region Timeline
 
         Task<WTServiceResponse<List<WorkoutSessionVM>>> GetSessionsForMonth(UserVM user, int year, int month);
-
+       
         #endregion
 
     }

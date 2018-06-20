@@ -1,0 +1,239 @@
+﻿@using Newtonsoft.Json;
+@model IEnumerable<WT_WebMVCApp.Models.WorkoutProgramVM>
+
+@{
+
+    ViewData["Title"] = "Workout Program";
+
+    var Routines = (List<WT_WebMVCApp.Models.WorkoutRoutineVM>)ViewData["Routines"];
+
+}
+
+<script>
+    var userPrograms = [];
+    serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))';
+    userPrograms = JSON.parse(serializedModel);
+
+    var userRoutines = [];
+    serializedRoutines = '@Html.Raw(JsonConvert.SerializeObject(Routines))';
+    userRoutines = JSON.parse(serializedRoutines);
+</script>
+
+
+<div class="row pl-4">
+    <div class="col-md-12 text-center">
+        <h2>
+            All Programs
+        </h2>
+    </div>
+</div>
+<div class="row pl-4">
+    <div class="col-md-12 mb-5">
+        <button type="button" class="btn btn-success btn-sm" id="addNewProgram" data-toggle="tooltip" data-placement="top" title="Add New Program">
+            Add new Program <i class="fa fa-plus"></i>
+        </button>
+    </div>
+</div>
+
+
+
+<div class="row mb-2 pl-4">
+    @foreach (var program in Model)
+    {
+        <div class="col-xl-3 col-sm-6 mb-3">
+            <div class="card border-dark" style="overflow:hidden">
+                <div class="card-body mb-4">
+
+                    <div class="card-body-icon-square">
+                        <img style="height:100px;width:100px" class="img-responsive" src="@program.ImagePath" />
+                    </div>
+
+                    <h5 class="card-title">@program.Name</h5>
+                    <p class="card-text text-muted">@program.Description</p>
+
+                </div>
+
+                <div class="text-center">
+                    <h6>
+                        Routines: &nbsp;
+                        <button type="button" class="btn btn-success btn-sm addRoutineToProgram" data-toggle="tooltip" data-placement="top"
+                                title="Add Routine to Program" data-programId="@program.ID">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var routine in program.WorkoutRoutines)
+                    {
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-md-10 text-uppercase font-weight-bold">
+                                    @routine.Name
+                                </div>
+                                <div class="col-md-2 p-0 text-center">
+                                    <img style="height:2.5rem;width:2.5rem" class="rounded-circle img-responsive" src="@routine.ImagePath" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <span class="badge badge-light plannedDatesPicker">
+                                        <i class="fa fa-calendar fa-2x"></i> Planned Dates:
+                                    </span>
+                                    <div style="font-size:1.1em">@routine.PlannedDates?.Replace(";"," ---- ")</div>
+                                </div>
+
+                            </div>
+                        </li>
+                    }
+                </ul>
+
+                <div class="card-footer text-center">
+                    <button type="button" class="btn btn-sm editProgram" data-toggle="tooltip" data-placement="top" title="Edit Program" data-programId="@program.ID">
+                        Edit <i class="fa fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm deleteProgram" data-toggle="tooltip" data-placement="top" title="Delete Program" data-programId="@program.ID">
+                        Delete <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+@Html.Partial("_AddRoutinesToProgramModal.cshtml")
+@Html.Partial("_ProgramModal.cshtml")
+@Html.Partial("_DeleteProgramModal.cshtml")
+
+<style>
+    .plannedDatesPicker {
+        cursor: pointer;
+    }
+
+</style>
+
+@section Scripts
+    {
+    <script>
+        $(function () {
+            //console.log(userPrograms);
+
+
+            $(document).on("click", "#addNewProgram", function () {
+                $(this).tooltip('hide');
+
+                $("#ProgramId").val("0"); //hidden field in the modal
+                $("#ProgramModalLabel").text("Add Program");
+                $("#Name").val("");
+                $("#Description").val("");
+                $("#previewImage").attr("src", "").hide();
+                $("#ProgramErrorMessage").hide();
+                $("label.error").hide();
+
+
+                $.each($(".routineEntry"), function (index, item) {
+                    $(item).removeClass("selectedRoutine");
+                });
+
+                $("#addRoutinesBtn").show();
+                $("#routineHolder").hide();
+
+                $("#ProgramModal").modal("show");
+
+            });
+
+            $(document).on("click", ".editProgram", function () {
+                $(this).tooltip('hide');
+
+                //populate the modal
+                var programId = $(this).attr("data-programId");
+
+                var program = userPrograms.filter(function (item) {
+                    return item.ID == programId;
+                })[0];
+
+                var programRoutines = [];
+                programRoutines = program.WorkoutRoutines.map(function (item) {
+                    return item.ID;
+                });
+                //console.log(program);
+
+                $("#ProgramId").val(programId); //hidden field in the modal
+                $("#ProgramModalLabel").text("Edit Program");
+                $("#Name").val(program.Name);
+                $("#Description").val(program.Description);
+                $("#previewImage").attr("src", program.ImagePath).show();
+                $("#ProgramErrorMessage").hide();
+                $("label.error").hide();
+
+
+                $.each($(".routineEntry2"), function (index, item) {
+                    var routineId = $(item).attr("data-routineId");
+                    routineId = parseInt(routineId);
+                    if (programRoutines.indexOf(routineId) != -1) {
+                        $(item).addClass("selectedRoutine");
+                    }
+                    else {
+                        $(item).removeClass("selectedRoutine");
+                    }
+                });
+
+                $("#addRoutinesBtn").hide();
+                $("#routineHolder").show();
+
+                $("#ProgramModal").modal("show");
+            });
+
+            $(document).on("click", ".deleteProgram", function () {
+                //populate the modal
+                var programId = $(this).attr("data-programId");
+                var program = userPrograms.filter(function (item) {
+                    return item.ID == programId;
+                })[0];
+                //console.log(exercise);
+
+                $("#del-ProgramId").val(programId);
+                $("#del-Name").val(program.Name);
+                $("#del-previewImage").attr("src", program.ImagePath).show();
+                $("#del-ErrorMessage").hide();
+
+                $("#del-ProgramModal").modal("show");
+            });
+
+            $(document).on("click", ".addRoutineToProgram", function () {
+                $(this).tooltip('hide');
+
+                var programId = $(this).attr("data-programId");
+                $("#addRoutineToProgramProgramId").val(programId); //hidden field in the modal
+
+                var program = userPrograms.filter(function (item) {
+                    return item.ID == programId;
+                })[0];
+
+                var programRoutines = [];
+                programRoutines = program.WorkoutRoutines.map(function (item) {
+                    return item.ID;
+                });
+
+                $.each($(".routineEntry1"), function (index, item) {
+                    var routineId = $(item).attr("data-routineId");
+                    routineId = parseInt(routineId);
+                    if (programRoutines.indexOf(routineId) != -1) {
+                        $(item).addClass("selectedRoutine");
+                    }
+                    else {
+                        $(item).removeClass("selectedRoutine");
+                    }
+                });
+
+                $("#addRoutineToProgramModal").modal("show");
+
+            });
+
+        });
+    </script>
+}
+
+
+
+
