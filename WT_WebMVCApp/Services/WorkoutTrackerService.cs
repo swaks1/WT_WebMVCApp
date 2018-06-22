@@ -372,6 +372,30 @@ namespace WT_WebMVCApp.Services
 
         #endregion
 
+        #region BodyStatistic
+
+        public async Task<WTServiceResponse<List<BodyStatisticVM>>> GetBodyStatistucForMonth(UserVM user, int month)
+        {
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.GetAsync($"/api/BodyStatistics/user/{user.ID}/BodyStat/ForMonth/{month}");
+
+
+            return await HandleApiResponse(response, async () =>
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var bodyStatsForMonth = JsonConvert.DeserializeObject<List<BodyStatisticVM>>(content);
+
+                return new WTServiceResponse<List<BodyStatisticVM>>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = bodyStatsForMonth
+                };
+            });
+        }
+
+        #endregion
+
         #region Handle Response Methods (sync and async)
 
         private WTServiceResponse<T> HandleApiResponse<T>(HttpResponseMessage response, Func<WTServiceResponse<T>> onSuccess)

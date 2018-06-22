@@ -47,5 +47,9 @@ namespace WT_WebMVCApp.Services
 
         #endregion
 
+        #region BodyStatistic
+        Task<WTServiceResponse<List<BodyStatisticVM>>> GetBodyStatistucForMonth(UserVM user, int month);
+        #endregion
+
     }
 }
