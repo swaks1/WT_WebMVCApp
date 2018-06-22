@@ -16,6 +16,8 @@
   ],
   "dependencies": {
     "Font-Awesome": "5.0.13",
-    "jquery.unobtrusive-ajax": "^3.2.5"
+    "jquery.unobtrusive-ajax": "^3.2.5",
+    "jquery-ui": "1.12.1",
+    "jquery-ui-multidatespicker": "^1.6.6"
   }
 }

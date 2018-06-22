@@ -1,27 +1,27 @@
 ﻿<!--This gets populated in WorkoutExercises-Index view -->
 
 
-<div class="modal fade" id="del-RoutineModal" tabindex="-1" role="dialog" aria-labelledby="del-RoutineModalLabel" aria-hidden="true">
+<div class="modal fade" id="del-ProgramModal" tabindex="-1" role="dialog" aria-labelledby="del-ProgramModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">        
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="del-RoutineModalLabel">Delete Routine ? </h5>
+                <h5 class="modal-title" id="del-ProgramModalLabel">Delete Program ? </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form id="del-RoutineForm" asp-antiforgery="true">
+                <form id="del-ProgramForm" asp-antiforgery="true">
                     <div class="row mb-3">
                         <div class="col-md-3 text-left">
                             <label for="del-Name" class="form-label mr-1">Name:</label>
                         </div>
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="del-Name" readonly> 
-                            <input type="hidden" id="del-RoutineId">
+                            <input type="hidden" id="del-ProgramId">
                         </div>
                         <div class="col-md-3">
-                                <img class="img-responsive rounded-circle" id="del-previewImage" alt="Image for Routine" width="100" height="100" />
+                                <img class="img-responsive rounded-circle" id="del-previewImage" alt="Image for Program" width="100" height="100" />
                         </div>
                     </div>
                 </form>
@@ -30,7 +30,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-danger" id="del-RoutineBtn">Delete routine</button>
+                <button type="button" class="btn btn-danger" id="del-programBtn">Delete Program</button>
             </div>
         </div>
     </div>
@@ -40,13 +40,13 @@
     $(function () {
         $("#del-previewImage").hide();
 
-        $("#del-RoutineBtn").click(function () {
-            var url = '@Url.Action("DeleteRoutine", "WorkoutRoutine")';
-            var form = $("#del-RoutineForm");
+        $("#del-programBtn").click(function () {
+            var url = '@Url.Action("DeleteProgram", "WorkoutProgram")';
+            var form = $("#del-ProgramForm");
             //we add the form in the constructor for the AntiForgery Token to be added in the form data
             var data = new FormData(form.get(0)); 
 
-            var id = $("#del-RoutineId").val();
+            var id = $("#del-ProgramId").val();
             data.append("ID", id);
 
             ShowLoader("modal-content");
@@ -60,7 +60,7 @@
                 method: 'POST',
                 success: function (data) {
                     if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
-                        window.location = '@Url.Action("Index", "WorkoutRoutine")';
+                        window.location = '@Url.Action("Index", "WorkoutProgram")';
                     }
                     else {
                         HideLoader();

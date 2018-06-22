@@ -1,0 +1,127 @@
+﻿<!-- Showed and initailzed from Index view-->
+@{
+    var Routines = (List<WT_WebMVCApp.Models.WorkoutRoutineVM>)ViewData["Routines"];
+}
+<div class="modal fade" id="addRoutineToProgramModal" tabindex="-1" role="dialog" aria-labelledby="addRoutineToProgramModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addRoutineToProgramModalLabel">Add Routines to Program </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+
+
+                        <form id="addRoutineToProgramForm" asp-antiforgery="true">
+                            <input type="hidden" id="addRoutineToProgramProgramId" value="0" />
+
+                            <div class="row">
+                                @foreach (var routine in Routines)
+                                {
+                                    <div class="col-xl-3 col-sm-6 mb-3">
+                                        <div class="card border-dark routineEntry1" style="overflow:hidden" data-routineId="@routine.ID">
+                                            <div class="card-body mb-4">
+
+                                                <div class="card-body-icon-square">
+                                                    <img style="height:100px;width:100px" class="img-responsive" src="@routine.ImagePath" />
+                                                </div>
+
+                                                <h5 class="card-title">@routine.Name</h5>
+                                                <p class="card-text text-muted">@routine.Description</p>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+                <div class="p-3 mb-2 bg-danger text-white" id="addRoutineToProgramModalErrorMessage" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="addRoutineToProgramModalSaveButton">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .modal-lg {
+        max-width: 1200px;
+    }
+
+    .routineEntry1:hover {
+        cursor: pointer;
+        border-left: 3px solid black;
+    }
+
+    .selectedRoutine {
+        background-color: darkseagreen;
+    }
+</style>
+
+<script>
+
+    $(function () {
+
+
+        $(document).on("click", ".routineEntry1", function () {
+            $(this).toggleClass("selectedRoutine");
+        });
+
+        $("#addRoutineToProgramModalSaveButton").click(function () {
+            var url = '@Url.Action("SaveRoutinesForProgram", "WorkoutProgram")';
+            var form = $("#addRoutineToProgramForm");
+            //we add the form in the constructor for the AntiForgery Token to be added in the form data
+            var data = new FormData(form.get(0));
+
+            var id = $("#addRoutineToProgramProgramId").val();
+            data.append("ID", id);
+
+            var routineIDs = [];
+                $.each($(".selectedRoutine"), function (index, item) {
+                    var id = $(item).attr("data-routineId");
+                    routineIDs.push(id);
+            });
+
+            data.append("SerializedRoutineIds", JSON.stringify(routineIDs));
+
+            ShowLoader("modal-content");
+
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false, //needed for setting to multipart
+                processData: false,
+                method: 'POST',
+                success: function (data) {
+
+                    if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
+                        sessionStorage.showSuccessAlert = true;
+                        window.location = '@Url.Action("Index", "WorkoutProgram")';
+                    }
+                    else {
+                        HideLoader();
+                        $("#addRoutineToProgramModalErrorMessage").text(JSON.stringify(data)).show();
+                    }
+
+                },
+                error: function (data) {
+                    HideLoader();
+                    $("#addRoutineToProgramModalErrorMessage").text(JSON.stringify(data)).show();
+                }
+            });
+
+        })
+    })
+</script>
