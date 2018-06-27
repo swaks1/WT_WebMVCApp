@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>@ViewData["Title"] - WT_WebMVCApp</title>
+
+    <link href="~/vendor/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="~/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="~/css/sb-admin.css" rel="stylesheet" />
+
+    <!--jQuery scripts-->
+    <script src="vendor/jquery/jquery.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery.unobtrusive-ajax/dist/jquery.unobtrusive-ajax.js"></script>
+</head>
+<body class="bg-dark">
+    <div class="container">
+        @RenderBody()
+    </div>
+
+    @RenderSection("Scripts", required: false)
+    <script src="~/js/site.js"></script>
+    <script src="~/vendor/bootstrap/js/bootstrap.bundle.js"></script>
+    <script src="~/vendor/jquery-easing/jquery.easing.js"></script>
+</body>
+</html>
+
+
+
+
+

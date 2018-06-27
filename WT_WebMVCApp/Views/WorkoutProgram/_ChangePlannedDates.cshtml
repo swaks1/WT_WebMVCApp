@@ -1,0 +1,106 @@
+﻿<!-- Needed files for MulitDatePicker jQuery UI plugin-->
+<link href="~/lib/jquery-ui/themes/base/jquery-ui.css" rel="stylesheet" />
+<link href="~/lib/jquery-ui/themes/base/theme.css" rel="stylesheet" />
+<link href="~/lib/jquery-ui-multidatespicker/jquery-ui.multidatespicker.css" rel="stylesheet" />
+
+<script src="~/lib/jquery-ui/jquery-ui.js"></script>
+<script src="~/lib/jquery-ui-multidatespicker/jquery-ui.multidatespicker.js"></script>
+<!-- end -->
+
+
+<div class="modal fade" id="changePlannedDatesModal" tabindex="-1" role="dialog" aria-labelledby="changePlannedDatesModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePlannedDatesModalLabel">Planned Dates for Routine</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <form id="changePlannedDatesForm" asp-antiforgery="true">
+                            <input type="hidden" id="changePlannedDates_RoutineId" value="0" />
+                            <input type="hidden" id="changePlannedDates_ProgramId" value="0" />
+                            <input type="hidden" id="changePlannedDates_PlannedDates" value="0" />
+
+                            <div class="row">
+                                <div class="col-md-6 offset-md-2 text-center">
+                                    <div id="multiDatePicker"></div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+                <div class="p-3 mb-2 bg-danger text-white" id="changePlannedDatesModalErrorMessage" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="changePlannedDatesModalSaveButton">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+</style>
+
+<script>
+
+    $(function () {
+
+        $('#multiDatePicker').multiDatesPicker();
+
+
+        $("#changePlannedDatesModalSaveButton").click(function () {
+            var url = '@Url.Action("SaveRoutinesForProgram", "WorkoutProgram")';
+            var form = $("#addRoutineToProgramForm");
+            //we add the form in the constructor for the AntiForgery Token to be added in the form data
+            var data = new FormData(form.get(0));
+
+            var id = $("#addRoutineToProgramProgramId").val();
+            data.append("ID", id);
+
+            var routineIDs = [];
+                $.each($(".selectedRoutine"), function (index, item) {
+                    var id = $(item).attr("data-routineId");
+                    routineIDs.push(id);
+            });
+
+            data.append("SerializedRoutineIds", JSON.stringify(routineIDs));
+
+            ShowLoader("modal-content");
+
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false, //needed for setting to multipart
+                processData: false,
+                method: 'POST',
+                success: function (data) {
+
+                    if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
+                        sessionStorage.showSuccessAlert = true;
+                        window.location = '@Url.Action("Index", "WorkoutProgram")';
+                    }
+                    else {
+                        HideLoader();
+                        $("#changePlannedDatesModalErrorMessage").text(JSON.stringify(data)).show();
+                    }
+
+                },
+                error: function (data) {
+                    HideLoader();
+                    $("#changePlannedDatesModalErrorMessage").text(JSON.stringify(data)).show();
+                }
+            });
+
+        })
+    })
+</script>

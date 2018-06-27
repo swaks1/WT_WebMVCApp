@@ -76,10 +76,10 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <span class="badge badge-light plannedDatesPicker">
+                                    <span class="badge badge-light plannedDatesPicker" data-routineId="@routine.ID" data-programId="@program.ID" data-plannedDates="@routine.PlannedDates">
                                         <i class="fa fa-calendar fa-2x"></i> Planned Dates:
                                     </span>
-                                    <div style="font-size:1.1em">@routine.PlannedDates?.Replace(";"," ---- ")</div>
+                                    <div style="font-size:1.1em">@routine.PlannedDates?.Replace(";", " ---- ")</div>
                                 </div>
 
                             </div>
@@ -104,12 +104,12 @@
 @Html.Partial("_AddRoutinesToProgramModal.cshtml")
 @Html.Partial("_ProgramModal.cshtml")
 @Html.Partial("_DeleteProgramModal.cshtml")
+@Html.Partial("_ChangePlannedDates.cshtml")
 
 <style>
     .plannedDatesPicker {
         cursor: pointer;
     }
-
 </style>
 
 @section Scripts
@@ -227,6 +227,36 @@
                 });
 
                 $("#addRoutineToProgramModal").modal("show");
+
+            });
+
+            $(document).on("click", ".plannedDatesPicker", function () {
+                $(this).tooltip('hide');
+                var routineId = $(this).attr("data-routineId");
+                var programId = $(this).attr("data-programId");
+                var plannedDates = $(this).attr("data-plannedDates");
+
+                var plannedDatesArray = [];
+                if (plannedDates != null && plannedDates != "") {
+                    plannedDatesArray = plannedDates.split(";");
+                }
+
+                $("#changePlannedDates_RoutineId").val(routineId); //hidden field in the modal
+                $("#changePlannedDates_ProgramId").val(programId); //hidden field in the modal
+                $("#changePlannedDates_PlannedDates").val(plannedDates); //hidden field in the modal
+
+                $('#multiDatePicker').multiDatesPicker('destroy');
+                //init datepicker
+                $('#multiDatePicker').multiDatesPicker({
+                    dateFormat: "yy-mm-dd"
+                });
+
+                //add selected dates if not empty
+                if (plannedDatesArray != null && plannedDatesArray.length != 0) {
+                    $('#multiDatePicker').multiDatesPicker('addDates', plannedDatesArray);
+                }
+
+                $("#changePlannedDatesModal").modal("show");
 
             });
 
