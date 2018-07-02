@@ -543,6 +543,25 @@ namespace WT_WebMVCApp.Services
             });
         }
 
+        public async Task<WTServiceResponse<List<BodyAttributeTemplateVM>>> GetAttributeTemplates(UserVM userVM)
+        {
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.GetAsync($"/api/BodyStatistics/user/{userVM.ID}/AttributeTemplates");
+
+            return await HandleApiResponse(response, async () =>
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var attributeTemplates = JsonConvert.DeserializeObject<List<BodyAttributeTemplateVM>>(content);
+
+                return new WTServiceResponse<List<BodyAttributeTemplateVM>>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = attributeTemplates
+                };
+            });
+        }
+
         #endregion
 
         #region Handle Response Methods (sync and async)
@@ -601,6 +620,8 @@ namespace WT_WebMVCApp.Services
                     }
             }
         }
+
+
 
 
         #endregion

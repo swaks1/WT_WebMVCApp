@@ -31,6 +31,9 @@ namespace WT_WebMVCApp.Controllers
 
             var response =  await _workoutTrackerService.GetBodyStatistucForMonth(UserVM, month.Value);
 
+            var attributeTemplates = await _workoutTrackerService.GetAttributeTemplates(UserVM);
+            ViewData["AttributeTemplates"] = attributeTemplates.ViewModel;
+
             return View(response.ViewModel);
         }
 

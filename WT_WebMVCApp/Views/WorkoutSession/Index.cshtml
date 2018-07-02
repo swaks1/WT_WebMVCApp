@@ -24,7 +24,7 @@
 <div class="row pl-4">
     <div class="col-md-12 text-center">
         <h2>
-            Session for day: <strong>@Model.Date</strong>
+            Session for day: <strong>@Model.Date?.ToString("yyyy-MMMM-dd")</strong>
         </h2>
         <input type="hidden" id="sessionId" value="@Model.ID" />
         <input type="hidden" id="sessionDate" value="@Model.Date" />
