@@ -46,6 +46,8 @@ namespace WT_WebMVCApp.Services
         Task<WTServiceResponse<string>> SaveProgram(WorkoutProgramVM program);
         Task<WTServiceResponse<string>> DeleteProgram(int iD);
         Task<WTServiceResponse<string>> SaveRoutinesForProgram(UpdateRoutinesForProgramModel routinesModel);
+        Task<WTServiceResponse<string>> UpdateDatesForProgramRoutines(WorkoutRoutineVM routineModel);
+        Task<WTServiceResponse<string>> ActivateOrDeactivateProgram(WorkoutProgramVM programModel);
 
         #endregion
 
@@ -56,7 +58,7 @@ namespace WT_WebMVCApp.Services
         #endregion
 
         #region BodyStatistic
-        Task<WTServiceResponse<List<BodyStatisticVM>>> GetBodyStatistucForMonth(UserVM user, int month);
+        Task<WTServiceResponse<List<BodyStatisticVM>>> GetBodyStatistucForMonth(UserVM user, int month);       
         #endregion
 
     }

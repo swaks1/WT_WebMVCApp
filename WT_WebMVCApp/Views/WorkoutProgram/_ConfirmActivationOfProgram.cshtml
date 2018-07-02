@@ -1,0 +1,110 @@
+﻿
+<div class="modal fade" id="confirmActivationModal" tabindex="-1" role="dialog" aria-labelledby="confirmActivationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmActivationModalLabel">Change State of the Program ?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <form id="confirmActivationForm" asp-antiforgery="true">
+                            <input type="hidden" id="confirmActivation_ProgramId" value="0" />
+                            <input type="hidden" id="confirmActivation_State" value="0" />
+                            <input type="hidden" id="confirmActivation_PositiveAnswer" value="0" />
+
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    Are you sure you want to <strong>Activate/Deactivate</strong> this program ?
+                                    <br /> 
+                                    All other active programs will be deactivated
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+                <div class="p-3 mb-2 bg-danger text-white" id="confirmActivationModalErrorMessage" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" id="confirmActivationModalSaveButton">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+</style>
+
+<script>
+
+    $(function () {
+
+        $('#confirmActivationModal').on('hidden.bs.modal', function (e) {
+
+            var positiveAnswer = $("#confirmActivation_PositiveAnswer").val();
+            if (positiveAnswer == 0) {
+                var programId = $("#confirmActivation_ProgramId").val();
+                $('#activeSwitch-' + programId).each(function () {
+                    this.checked = !this.checked;
+                });
+            }
+
+            console.log(positiveAnswer);
+        })
+
+
+        $("#confirmActivationModalSaveButton").click(function () {
+            var url = '@Url.Action("ActivateOrDeactivateProgram", "WorkoutProgram")';
+            var form = $("#confirmActivationForm");
+            //we add the form in the constructor for the AntiForgery Token to be added in the form data
+            var data = new FormData(form.get(0));
+
+            var programId = $("#confirmActivation_ProgramId").val();
+            var state = $('#confirmActivation_State').val();
+
+            var toBeActivated = false;
+            if (state == "1")
+                toBeActivated = true;
+
+
+            data.append("ID", programId);
+            data.append("ToBeActivated", toBeActivated);
+
+            $("#confirmActivation_PositiveAnswer").val("1");
+            ShowLoader("modal-content");
+
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false, //needed for setting to multipart
+                processData: false,
+                method: 'POST',
+                success: function (data) {
+
+                    if (data.ResponseMessage == "" || data.ResponseMessage == "null" || data.ResponseMessage == null) {
+                        window.location = '@Url.Action("Index", "WorkoutProgram")';
+                    }
+                    else {
+                        HideLoader();
+                        $("#confirmActivationModalErrorMessage").text(JSON.stringify(data)).show();
+                    }
+
+                },
+                error: function (data) {
+                    HideLoader();
+                    $("#confirmActivationModalErrorMessage").text(JSON.stringify(data)).show();
+                }
+            });
+
+        })
+    })
+</script>

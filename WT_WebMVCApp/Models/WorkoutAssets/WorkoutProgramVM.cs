@@ -22,5 +22,7 @@ namespace WT_WebMVCApp.Models
         public int? WTUserID { get; set; }
 
         public ICollection<WorkoutRoutineVM> WorkoutRoutines { get; set; }
+
+        public bool ToBeActivated { get; set; }
     }
 }

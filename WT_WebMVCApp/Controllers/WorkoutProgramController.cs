@@ -49,7 +49,6 @@ namespace WT_WebMVCApp.Controllers
             return View(response.ViewModel);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddProgram([FromForm] WorkoutProgramVM program)
@@ -126,6 +125,23 @@ namespace WT_WebMVCApp.Controllers
             return Json(response);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateDatesForProgramRoutines([FromForm] WorkoutRoutineVM routineModel)
+        {
+            var response = await _workoutTrackerService.UpdateDatesForProgramRoutines(routineModel);
+
+            return Json(response);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActivateOrDeactivateProgram([FromForm] WorkoutProgramVM programModel)
+        {
+            var response = await _workoutTrackerService.ActivateOrDeactivateProgram(programModel);
+
+            return Json(response);
+        }
 
     }
 }

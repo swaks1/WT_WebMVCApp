@@ -76,10 +76,31 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
-                                    <span class="badge badge-light plannedDatesPicker" data-routineId="@routine.ID" data-programId="@program.ID" data-plannedDates="@routine.PlannedDates">
-                                        <i class="fa fa-calendar fa-2x"></i> Planned Dates:
-                                    </span>
-                                    <div style="font-size:1.1em">@routine.PlannedDates?.Replace(";", " ---- ")</div>
+                                    <!-- If activate dont allow to change planned dates-->
+                                    @if (program.IsActivated)
+                                    {
+                                        <span class="badge badge-light">
+                                            <i class="fa fa-calendar fa-2x"></i> Planned Dates:
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-light plannedDatesPicker" data-routineId="@routine.ID"
+                                              data-programId="@program.ID" data-plannedDates="@routine.PlannedDates">
+                                            <i class="fa fa-calendar fa-2x"></i> Planned Dates:
+                                        </span>
+                                    }
+
+                                    <div style="font-size:1.1em" class="pl-3 pt-2">
+                                        @{
+                                            var dates = routine.PlannedDates?.Split(";").ToList();
+                                            foreach (var date in dates)
+                                            {
+                                                <span>@date</span><br />
+                                            }
+                                        }
+                                    </div>
                                 </div>
 
                             </div>
@@ -88,12 +109,47 @@
                 </ul>
 
                 <div class="card-footer text-center">
-                    <button type="button" class="btn btn-sm editProgram" data-toggle="tooltip" data-placement="top" title="Edit Program" data-programId="@program.ID">
-                        Edit <i class="fa fa-edit"></i>
-                    </button>
-                    <button type="button" class="btn btn-sm deleteProgram" data-toggle="tooltip" data-placement="top" title="Delete Program" data-programId="@program.ID">
-                        Delete <i class="fa fa-times"></i>
-                    </button>
+                    <div class="row">
+                        <!-- If inactive allow to Edit or Delete-->
+                        @if (program.IsActivated == false)
+                        {
+
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-sm editProgram" data-toggle="tooltip" data-placement="top" title="Edit Program" data-programId="@program.ID">
+                                    Edit <i class="fa fa-edit"></i>
+                                </button>
+                            </div>
+
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-sm deleteProgram" data-toggle="tooltip" data-placement="top" title="Delete Program" data-programId="@program.ID">
+                                    Delete <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+
+                        }
+
+
+                        <div class="col-md-4">
+                            <!-- Rounded switch -->
+                            <div class="onoffswitch">
+                                @if (program.IsActivated)
+                                {
+                                    <input type="checkbox" data-programId="@program.ID"
+                                           class="onoffswitch-checkbox activeSwitch" id="activeSwitch-@program.ID" checked>
+                                }
+                                else
+                                {
+                                    <input type="checkbox" data-programId="@program.ID"
+                                           class="onoffswitch-checkbox activeSwitch" id="activeSwitch-@program.ID">
+                                }
+                                <label class="onoffswitch-label" for="activeSwitch-@program.ID">
+                                    <span class="onoffswitch-inner"></span>
+                                    <span class="onoffswitch-switch"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -105,6 +161,7 @@
 @Html.Partial("_ProgramModal.cshtml")
 @Html.Partial("_DeleteProgramModal.cshtml")
 @Html.Partial("_ChangePlannedDates.cshtml")
+@Html.Partial("_ConfirmActivationOfProgram.cshtml")
 
 <style>
     .plannedDatesPicker {
@@ -248,7 +305,8 @@
                 $('#multiDatePicker').multiDatesPicker('destroy');
                 //init datepicker
                 $('#multiDatePicker').multiDatesPicker({
-                    dateFormat: "yy-mm-dd"
+                    dateFormat: "yy-mm-dd",
+                    separator: ";"
                 });
 
                 //add selected dates if not empty
@@ -257,6 +315,31 @@
                 }
 
                 $("#changePlannedDatesModal").modal("show");
+
+            });
+
+            $(document).on("change", ".activeSwitch", function () {
+                var programId = $(this).attr("data-programId");
+                var isChecked = $(this).is(':checked');
+
+                var state = "0";
+                if (isChecked)
+                    state = "1";
+
+                //populate the modal
+                var programId = $(this).attr("data-programId");
+                var program = userPrograms.filter(function (item) {
+                    return item.ID == programId;
+                })[0];
+
+                $("#confirmActivation_ProgramId").val(programId);
+                $('#confirmActivation_State').val(state);
+                $('#confirmActivation_PositiveAnswer').val("0");
+
+
+                $("#confirmActivationModalErrorMessage").hide();
+
+                $("#confirmActivationModal").modal("show");
 
             });
 

@@ -21,6 +21,8 @@ namespace WT_WebMVCApp.Models
 
         public ICollection<ExerciseVM> Exercises { get; set; }
         public ICollection<int> ProgramsIds { get; set; }
+
+        public string ProgramId { get; set; }
     }
     
 }

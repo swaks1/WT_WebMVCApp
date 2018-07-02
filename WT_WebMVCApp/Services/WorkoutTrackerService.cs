@@ -441,6 +441,50 @@ namespace WT_WebMVCApp.Services
             });
         }
 
+        public async Task<WTServiceResponse<string>> UpdateDatesForProgramRoutines(WorkoutRoutineVM routineModel)
+        {
+            // serialize it
+            var serializedRoutine = JsonConvert.SerializeObject(routineModel);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PostAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{routineModel.ProgramId}/updateDatesForRoutine",
+                                                new StringContent(serializedRoutine, System.Text.Encoding.Unicode, "application/json"));
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
+
+        public async Task<WTServiceResponse<string>> ActivateOrDeactivateProgram(WorkoutProgramVM programModel)
+        {
+            // serialize it
+            var serializedProgram = JsonConvert.SerializeObject(programModel);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var path = "activate";
+
+            if (programModel.ToBeActivated == false)
+                path = "deactivate";
+
+            var response = await httpClient.PostAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{programModel.ID}/{path}",
+                                   new StringContent(serializedProgram, System.Text.Encoding.Unicode, "application/json"));
+
+            return HandleApiResponse(response, () =>
+            {
+                return new WTServiceResponse<string>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = "",
+                };
+            });
+        }
 
         #endregion
 

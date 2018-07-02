@@ -10,5 +10,6 @@ namespace WT_WebMVCApp.Models.WorkoutAssets
         public int ID { get; set; }
         public List<WorkoutRoutineVM> Routines { get; set; }
         public string SerializedRoutineIds { get; set; }
+        public string SerializedRoutineDates { get; set; }
     }
 }
