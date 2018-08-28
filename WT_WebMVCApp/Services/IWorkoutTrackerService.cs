@@ -29,8 +29,8 @@ namespace WT_WebMVCApp.Services
         #endregion
 
         #region Sessions
-        
-        Task<WTServiceResponse<WorkoutSessionVM>> GetSessionForDay(WorkoutSessionRequest workoutSessionRequest);        
+
+        Task<WTServiceResponse<WorkoutSessionVM>> GetSessionForDay(WorkoutSessionRequest workoutSessionRequest);
         Task<WTServiceResponse<string>> UpdateConcreteExerciseAttributes(ConcreteExerciseVM exercise);
         Task<WTServiceResponse<string>> DeleteConcreteExercise(int exerciseId, int sessionId);
         Task<WTServiceResponse<string>> SaveExercisesForSession(WorkoutSessionRequest workoutSessionRequest);
@@ -54,13 +54,14 @@ namespace WT_WebMVCApp.Services
         #region Timeline
 
         Task<WTServiceResponse<List<WorkoutSessionVM>>> GetSessionsForMonth(UserVM user, int year, int month);
-       
+
         #endregion
 
         #region BodyStatistic
 
-        Task<WTServiceResponse<List<BodyStatisticVM>>> GetBodyStatistucForMonth(UserVM user, int month);
+        Task<WTServiceResponse<List<BodyStatisticVM>>> GetBodyStatistucForMonth(UserVM user, int month, int year);
         Task<WTServiceResponse<List<BodyAttributeTemplateVM>>> GetAttributeTemplates(UserVM userVM);
+        Task<WTServiceResponse<BodyStatisticVM>> AddStatistic(BodyStatisticVM statistic);
 
         #endregion
 

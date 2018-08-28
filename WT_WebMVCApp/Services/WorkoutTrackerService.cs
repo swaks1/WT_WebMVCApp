@@ -493,8 +493,8 @@ namespace WT_WebMVCApp.Services
 
         public async Task<WTServiceResponse<List<WorkoutSessionVM>>> GetSessionsForMonth(UserVM user, int year, int month)
         {
-            var startDate = new DateTime(year, month, 1);
-            var endDate = startDate.AddMonths(1).AddDays(-1);
+            var startDate = new DateTime(year - 2, month, 1);
+            var endDate = new DateTime(year + 2, month, 1);
 
             var sessionRequest = new WorkoutSessionRequest { User = user, StartDate = startDate, EndDate = endDate };
 
@@ -523,11 +523,11 @@ namespace WT_WebMVCApp.Services
 
         #region BodyStatistic
 
-        public async Task<WTServiceResponse<List<BodyStatisticVM>>> GetBodyStatistucForMonth(UserVM user, int month)
+        public async Task<WTServiceResponse<List<BodyStatisticVM>>> GetBodyStatistucForMonth(UserVM user, int month, int year)
         {
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.GetAsync($"/api/BodyStatistics/user/{user.ID}/BodyStat/ForMonth/{month}");
+            var response = await httpClient.GetAsync($"/api/BodyStatistics/user/{user.ID}/BodyStat/ForMonth/{month}/year/{year}");
 
 
             return await HandleApiResponse(response, async () =>
@@ -561,6 +561,30 @@ namespace WT_WebMVCApp.Services
                 };
             });
         }
+
+        public async Task<WTServiceResponse<BodyStatisticVM>> AddStatistic(BodyStatisticVM statistic)
+        {
+            // serialize it
+            var serializedStatistic = JsonConvert.SerializeObject(statistic);
+
+            var httpClient = await _workoutTrackerHttpClient.GetClient();
+
+            var response = await httpClient.PostAsync($"/api/BodyStatistics/user/{WorkotTrackerHelper.UserId}/BodyStat",
+                                                new StringContent(serializedStatistic, System.Text.Encoding.Unicode, "application/json"));
+
+            return await HandleApiResponse(response, async () =>
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                var statisticVM = JsonConvert.DeserializeObject<BodyStatisticVM>(content);
+
+                return new WTServiceResponse<BodyStatisticVM>
+                {
+                    StatusCode = response.StatusCode,
+                    ViewModel = statisticVM,
+                };
+            });
+        }
+
 
         #endregion
 
@@ -620,8 +644,6 @@ namespace WT_WebMVCApp.Services
                     }
             }
         }
-
-
 
 
         #endregion

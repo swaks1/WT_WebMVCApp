@@ -1,5 +1,6 @@
 ﻿@using Newtonsoft.Json;
 @using System.Globalization;
+@using WT_WebMVCApp.Models;
 @model List<BodyStatisticVM>
 
 
@@ -9,7 +10,11 @@
 
 
 @{
-    DateTime reference = DateTime.Now;
+    var attributes = ViewData["AttributeTemplates"] as List<BodyAttributeTemplateVM>;
+    var reference = (DateTime)ViewData["Date"];
+    var dateBefore = reference.AddMonths(-1).ToShortDateString();
+    var dateAfter = reference.AddMonths(1).ToShortDateString();
+
     Calendar calendar = CultureInfo.CurrentCulture.Calendar;
 
     IEnumerable<int> daysInMonth = Enumerable.Range(1, calendar.GetDaysInMonth(reference.Year, reference.Month));
@@ -26,35 +31,61 @@
     var bodyStatistics = [];
     serializedModel = '@Html.Raw(JsonConvert.SerializeObject(Model))';
     bodyStatistics = JSON.parse(serializedModel);
+
+    var attributeTemplates = [];
+    serializedAttributeTemplates = '@Html.Raw(JsonConvert.SerializeObject(attributes))';
+    attributeTemplates = JSON.parse(serializedAttributeTemplates);
+    
 </script>
 
 
 
 
 <div class="row pl-4">
-    <div class="col-md-12 text-center">
+
+    <div class="col-md-8 offset-md-2 text-center">
         <h2>
+            <a class="btn btn-primary" href="~/BodyStatistic/Index?date=@dateBefore" data-toggle="tooltip" data-placement="top" title="Previous Month"> &lt; </a>
             Body statistic
+            <a class="btn btn-primary" href="~/BodyStatistic/Index?date=@dateAfter" data-toggle="tooltip" data-placement="top" title="Next Month"> &gt; </a>
         </h2>
     </div>
+
 </div>
 
 <div class="row pt-2">
     @foreach (var week in weeks)
     {
         var statistic = Model.FirstOrDefault(item => item.Week == weekNum);
+        var weekFormated = string.Format($"{week.Item1.ToString("yyyy-MMMM-dd")} - {week.Item2.ToString("yyyy-MMMM-dd")}");
+        var statisticId = statistic != null ? statistic.ID : 0;
 
         <div class="col-md-12">
-            <h3>@string.Format($"{week.Item1.ToString("yyyy-MMMM-dd")} - {week.Item2.ToString("yyyy-MMMM-dd")}") </h3>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <h3>@weekFormated</h3>
+                </div>
+
+                <div class="col-md-3 text-right">
+                    <button type="button" class="btn btn-success btn-sm modifyStatistic" data-toggle="tooltip" data-placement="top" title="Modify Statistic"
+                            data-Month="@reference.Month" data-Year="@reference.Year" data-Week="@weekNum" data-week-full="@weekFormated" data-statistic-id="@statisticId">
+                        Modify Statistic <i class="fa fa-plus"></i>
+                    </button>
+                </div>
+
+            </div>
+
+
 
             <div class="row p-4">
 
                 @if (statistic != null)
                 {
-                    foreach (var stat in statistic.BodyStatAttributes)
-                    {
-                        <div class="col-md-4">
-                            <div class="row">
+                    <div class="col-md-4">
+                        @foreach (var stat in statistic.BodyStatAttributes)
+                        {                        
+                            <div class="row mb-2">
                                 <div class="col-md-5 pt-0 text-center">
                                     <span class="badge badge-pill badge-secondary">@stat.AttributeName</span>
 
@@ -63,11 +94,17 @@
                                 <div class="col-md-3 text-center">
                                     <input type="text" class="form-control form-control-sm" value="@stat.AttributeValue" readonly>
                                 </div>
+
                             </div>
-                        </div>
+                        }
+                    </div>
 
-
-                    }
+                    <div class="col-md-6">
+                        @if (!string.IsNullOrEmpty(statistic.ImagePath))
+                        {
+                            <img style="height:150px;width:150px" class="img img-responsive" src="@statistic.ImagePath" />
+                        }
+                    </div>
 
                 }
                 else
@@ -87,12 +124,133 @@
 </div>
 
 
-
+@Html.Partial("_StatisticModal.cshtml")
 
 
 
 @section Scripts{
+    <script>
+        $(function () {
 
+            $(document).on("click", ".modifyStatistic", function () {
+                //populate the modal                 
+                var statisticId = $(this).attr("data-statistic-id");
+                var fullWeek = $(this).attr("data-week-full");
+                var week = $(this).attr("data-week");
+                var month = $(this).attr("data-month");
+                var year = $(this).attr("data-year");
+                var attributes = attributeTemplates;
+                var action = "Add New Statistic";
+                var imageUrl = "";
+
+                //if this was edit not add new
+                if (statisticId != 0) {
+                    var statistic = bodyStatistics.filter(function (item) {
+                        return item.ID == statisticId;
+                    })[0];
+                    attributes = statistic.BodyStatAttributes;
+                    imageUrl = statistic.ImagePath;
+                    action = "Edit Statistic"
+                }
+
+                $("#statisticModalLabel").text(action);
+                $("#statisticWeekText").text(fullWeek);
+
+                $("#StatisticId").val(statisticId);
+                $("#StatisticWeek").val(week);
+                $("#StatisticMonth").val(month);
+                $("#StatisticYear").val(year);
+
+                $("#previewImage").attr("src", imageUrl).hide();
+                if (imageUrl != "")
+                    $("#previewImage").attr("src", imageUrl).show();
+
+                $("#ErrorMessage").hide();
+                $("label.error").hide();
+
+                $("#AttributeHolder").empty();
+
+                //add mandatory attributes when creating new..(we have ours in attributes )
+                $.each(attributes, function (index, item) {
+                    var clone = $(".clonableRow").clone();
+                    $(clone).removeClass("clonableRow");
+                    $(clone).addClass("AttributeInstance");
+                    $(clone).find(".AttributeId").first().val(0);
+                    $(clone).find(".AttributeDeletable").first().val(item.IsDeletable);
+                    $(clone).find(".AttributeNameSpan").first().text(item.AttributeName);
+                    $(clone).find(".AttributeNameInput").first().val(item.AttributeName);
+                    $(clone).find(".AttributeValue").first().val(item.AttributeValue).attr("readonly", false);
+                    console.log(item.IsDeletable)
+                    if (item.IsDeletable == "false")
+                        $(clone).find(".attrDelete").first().remove();
+                    $(clone).find(".attrEdit").first().remove();
+
+                    $(clone).show();
+                    $(clone).appendTo("#AttributeHolder");
+                });
+
+                $("#statisticModal").modal("show");
+            });
+
+
+            $(".editExercise").on("click", function () {
+                //populate the modal
+                var exerciseId = $(this).attr("data-exerciseId");
+                var exercise = userExercises.filter(function (item) {
+                    return item.ID == exerciseId;
+                })[0];
+                //console.log(exercise);
+
+                $("#exerciseModalLabel").text("Edit Exercise");
+                $("#ExerciseId").val(exercise.ID);
+                $("#Name").val(exercise.Name);
+                $("#Description").val(exercise.Description);
+                $("#Category").val(exercise.Category);
+                $("#previewImage").attr("src", exercise.ImagePath).show();
+                $("#ErrorMessage").hide();
+                $("label.error").hide();
+
+                $("#AttributeHolder").empty();
+                $.each(exercise.Attributes, function (index, item) {
+                    var clone = $(".clonableRow").clone();
+                    $(clone).removeClass("clonableRow");
+                    $(clone).addClass("AttributeInstance");
+                    $(clone).find(".AttributeId").first().val(item.ID);
+                    $(clone).find(".AttributeDeletable").first().val(item.IsDeletable);
+                    $(clone).find(".AttributeNameSpan").first().text(item.AttributeName);
+                    $(clone).find(".AttributeNameInput").first().val(item.AttributeName);
+                    $(clone).find(".AttributeValue").first().val(item.AttributeValue);
+                    if (item.IsDeletable == false)
+                        $(clone).find(".attrDelete").first().remove();
+
+                    $(clone).show();
+                    $(clone).appendTo("#AttributeHolder");
+                });
+                $("#exerciseModal").modal("show");
+            });
+
+
+
+            $(".deleteExercise").on("click", function () {
+                //populate the modal
+                var exerciseId = $(this).attr("data-exerciseId");
+                var exercise = userExercises.filter(function (item) {
+                    return item.ID == exerciseId;
+                })[0];
+                //console.log(exercise);
+
+                $("#del-ExerciseId").val(exercise.ID);
+                $("#del-Name").val(exercise.Name);
+                $("#del-previewImage").attr("src", exercise.ImagePath).show();
+                $("#del-ErrorMessage").hide();
+
+                $("#del-ExerciseModal").modal("show");
+            });
+
+
+
+        });
+    </script>
 }
 
 

@@ -1,0 +1,246 @@
+﻿<!--This gets populated in BodyStatistic-Index view -->
+
+
+<div class="modal fade" id="statisticModal" tabindex="-1" role="dialog" aria-labelledby="statisticModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">        
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statisticModalLabel">Add Body Statistics</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="statisticForm" asp-antiforgery="true">
+                    <div class="row mb-3">
+                        <div class="col-md-12 text-center">
+                            <h4 id="statisticWeekText"></h4>
+                            <input type="hidden" id="StatisticId">
+                            <input type="hidden" id="StatisticMonth">
+                            <input type="hidden" id="StatisticYear">
+                            <input type="hidden" id="StatisticWeek">
+                        </div>
+                    </div>
+
+
+                    <div class="row mb-3">
+                        <div class="col-md-3 text-left">
+                            <label for="Image" class="form-label mr-1">Image:</label>
+                        </div>
+                        <div class="col-md-6 pr-0">
+                            <input type="file" class="form-control-file" id="Image" name="Image" accept="image/*" onchange="loadFile(event)">
+                        </div>
+                        <div class="col-md-3 pl-0">
+                            <img class="img-responsive rounded-circle" id="previewImage" alt="Image for Statistic" width="100" height="100" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3 mt-5">
+                        <div class="col-md-3">
+                            <label for="" class="form-label mr-1">Body Attributes:</label><br />
+                            <button type="button" class="btn btn-success btn-sm attrAddNew" data-toggle="tooltip" data-placement="top" title="Add New Attribute">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+
+                        <div class="col-md-8 pr-0">
+                            <div class="row">
+                                <div class="col-md-5 font-weight-bold text-center">Name</div>
+                                <div class="col-md-3 font-weight-bold text-center">Value</div>
+                                <div class="col-md-4 font-weight-bold text-center">Actions</div>
+                            </div>
+                            <div class="row pt-2">
+                                <div class="col-md-12" id="AttributeHolder">
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Just a template it is not shown yet.. AttributeInstance class will be added when cloned-->
+                        <div class="row mb-2 clonableRow" style="display:none">
+                            <input type="hidden" class="AttributeId" value="0">
+                            <input type="hidden" class="AttributeDeletable" value="false">
+                            <div class="col-md-5 pt-0 text-center">
+                                <span class="badge badge-pill badge-secondary AttributeNameSpan"></span>
+                                <input type="text" class="form-control form-control-sm AttributeNameInput" style="display:none">
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <input type="text" class="form-control form-control-sm AttributeValue" readonly>
+                            </div>
+                            <div class="col-md-4 pt-0 text-center">
+                                <button type="button" class="btn btn-warning btn-sm attrEdit" data-toggle="tooltip" data-placement="top" title="Edit Attribute">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm attrSave" data-toggle="tooltip" data-placement="top" title="Save Attribute" style="display:none">
+                                    <i class="fa fa-check"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm attrDelete" data-toggle="tooltip" data-placement="top" title="Delete Attribute">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+
+                <div class="p-3 mb-2 bg-danger text-white" id="ErrorMessage" style="display:none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveStatisticBtn">Save statistic</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    var loadFile = function (event) {
+        $("#previewImage").attr("src", URL.createObjectURL(event.target.files[0]));
+        $("#previewImage").show();
+    };
+
+
+    $(function () {
+
+
+        $("#previewImage").hide();
+
+        $(".attrAddNew").click(function () {
+            $(this).tooltip('hide');
+
+            var clone = $(".clonableRow").clone();
+            $(clone).removeClass("clonableRow");
+            $(clone).addClass("AttributeInstance");
+
+            $(clone).find(".AttributeDeletable").val("true");
+
+            $(clone).find(".AttributeNameSpan").hide();
+            $(clone).find(".AttributeNameInput").show();
+
+            $(clone).find(".AttributeValue").attr("readonly", false);
+
+            $(clone).find(".attrEdit").hide();
+            $(clone).find(".attrSave").show();
+            $(clone).show();
+            $(clone).appendTo("#AttributeHolder");
+        });
+
+        //this has to be with .on("click") beacause are dynamicly added
+        $(document).on("click",".attrDelete", function () {
+            $(this).tooltip('hide');
+            var attributeInstance = $(this).closest('.AttributeInstance');
+            $(attributeInstance).hide('slow', function () { $(attributeInstance).remove(); })
+        });
+
+        $(document).on("click", ".attrEdit", function () {
+            $(this).tooltip('hide');
+            var attributeInstance = $(this).closest('.AttributeInstance');
+
+            var isDeletable = $(attributeInstance).find(".AttributeDeletable").val();
+            if (isDeletable != "false") {
+                $(attributeInstance).find(".AttributeNameSpan").hide();
+                $(attributeInstance).find(".AttributeNameInput").show();
+            }
+
+            $(attributeInstance).find(".AttributeValue").attr("readonly", false);
+
+            $(attributeInstance).find(".attrEdit").hide();
+            $(attributeInstance).find(".attrSave").show();
+        });
+
+        $(document).on("click", ".attrSave", function () {
+            $(this).tooltip('hide');
+            var attributeInstance = $(this).closest('.AttributeInstance');
+
+            var newAttrName = $(attributeInstance).find(".AttributeNameInput").val();
+            $(attributeInstance).find(".AttributeNameSpan").text(newAttrName).show();
+            $(attributeInstance).find(".AttributeNameInput").hide();
+
+            $(attributeInstance).find(".AttributeValue").attr("readonly", true);
+
+            $(attributeInstance).find(".attrEdit").show();
+            $(attributeInstance).find(".attrSave").hide();
+        });
+
+
+        //when clicking on Save Button SUBMIT the form (it goes below in validate function)
+        $("#saveStatisticBtn").click(function () {
+             $("#statisticForm").submit();
+        })
+
+        //when is submited this validation will fire (jqueryvalidation.org - jquery.validate.js)
+        //if successfull submitHandler is called
+        $("#statisticForm").validate({
+            submitHandler: function (form) {
+                saveStatistic();
+            }
+        });
+
+        function saveStatistic() {
+            var form = $("#statisticForm");
+            //we add the form in the constructor for the AntiForgery Token to be added in the form data
+            var data = new FormData(form.get(0)); 
+
+            var id = $("#StatisticId").val();
+            var year = $("#StatisticYear").val();
+            var month = $("#StatisticMonth").val();
+            var week = $("#StatisticWeek").val();
+            var image = $("#Image").get(0).files[0];
+
+            var attributes = [];
+            var attributeInstances = $(".AttributeInstance");
+            $.each(attributeInstances, function (index,item) {
+                var attrName = $(item).find(".AttributeNameInput").val();
+                var attrValue = $(item).find(".AttributeValue").val();
+                var isDeletable = $(item).find(".AttributeDeletable").val();
+
+                if (attrName.trim() == "" || attrValue.trim() == "") {
+                    $(item).remove();
+                    return true; //this is continue in jQuery.each
+                }
+
+                var attributeObject = {
+                    ID: $(item).find(".AttributeId").val(),
+                    AttributeName: attrName,
+                    AttributeValue: attrValue,
+                    IsDeletable: isDeletable
+                }
+                attributes.push(attributeObject);
+            });
+
+            data.append("ID", id);
+            data.append("Year", year);
+            data.append("Month", month);
+            data.append("Week", week);
+            data.append("Image", image);
+            data.append("AttributesSerialized", JSON.stringify(attributes));
+
+            ShowLoader("modal-content");
+
+            var url = '@Url.Action("SaveStatistic", "BodyStatistic")';
+
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false, //needed for setting to multipart..
+                processData: false, //needed for sending files not to be serialized to string..
+                method: 'POST',
+                success: function (data) {
+                    $("#statisticModal").modal('hide');
+                    window.location = '@Url.Action("Index", "BodyStatistic")';
+                },
+                error: function (data) {
+                    HideLoader();
+                    $("#ErrorMessage").text(JSON.stringify(data)).show();
+                }
+            });
+
+        }
+
+
+    })
+</script>

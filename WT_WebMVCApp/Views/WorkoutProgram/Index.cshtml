@@ -94,7 +94,13 @@
 
                                     <div style="font-size:1.1em" class="pl-3 pt-2">
                                         @{
-                                            var dates = routine.PlannedDates?.Split(";").ToList();
+                                            var dates = new List<string>();
+                                            if(routine.PlannedDates != null)
+                                            {
+                                                dates = routine.PlannedDates.Split(";").ToList();
+
+                                            }
+
                                             foreach (var date in dates)
                                             {
                                                 <span>@date</span><br />
