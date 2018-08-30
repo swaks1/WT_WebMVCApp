@@ -10,9 +10,14 @@ using WT_WebMVCApp.Services;
 using WT_WebMVCApp.Models;
 using WT_WebMVCApp.Helpers;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication;
+using System.Diagnostics;
 
 namespace WT_WebMVCApp.Controllers
 {
+    [Authorize]
     public class WorkoutSessionController : Controller
     {
         private readonly ILogger<WorkoutSessionController> _logger;
@@ -27,6 +32,8 @@ namespace WT_WebMVCApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string queryDate)
         {
+            await WriteOutIdentityInformation();
+
             var currentDate = DateTime.Now;
             if(queryDate != null)
             {
@@ -36,7 +43,7 @@ namespace WT_WebMVCApp.Controllers
                     currentDate = parsedDate;
                 }
             }
-            var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
+            var UserVM = new UserVM { ID = WorkotTrackerHelper.GetUserId(User) };
             var sessionRequest = new WorkoutSessionRequest { User = UserVM, CurrentDate = currentDate };
 
             var response = await _workoutTrackerService.GetSessionForDay(sessionRequest);
@@ -117,6 +124,19 @@ namespace WT_WebMVCApp.Controllers
             return Json(response);
         }
 
+        public async Task WriteOutIdentityInformation()
+        {
+            // get the saved identity token
+            var identityToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
 
+            // write it out
+            Debug.WriteLine($"Identity token: {identityToken}");
+
+            // write out the user claims
+            foreach (var claim in User.Claims)
+            {
+                Debug.WriteLine($"Claim type: {claim.Type} - Claim value: {claim.Value}");
+            }
+        }
     }
 }

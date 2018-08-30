@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,13 @@ namespace WT_WebMVCApp.Services
 {
     public class WorkoutTrackerService : IWorkoutTrackerService
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IWorkoutTrackerHttpClient _workoutTrackerHttpClient;
 
-        public WorkoutTrackerService(IWorkoutTrackerHttpClient workoutTrackerHttpClient)
+        public WorkoutTrackerService(IWorkoutTrackerHttpClient workoutTrackerHttpClient, IHttpContextAccessor httpContextAccessor)
         {
             _workoutTrackerHttpClient = workoutTrackerHttpClient;
+            _httpContextAccessor = httpContextAccessor;
         }
 
 
@@ -49,7 +52,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Exercises/user/{WorkotTrackerHelper.UserId}",
+            var response = await httpClient.PostAsync($"/api/Exercises/user/{UserId()}",
                                                 new StringContent(serializedExercise, System.Text.Encoding.Unicode, "application/json"));
 
             return await HandleApiResponse(response, async () =>
@@ -72,7 +75,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PutAsync($"/api/Exercises/user/{WorkotTrackerHelper.UserId}/exercise/{exercise.ID}",
+            var response = await httpClient.PutAsync($"/api/Exercises/user/{UserId()}/exercise/{exercise.ID}",
                                                 new StringContent(serializedExercise, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -90,7 +93,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.DeleteAsync($"/api/Exercises/user/{WorkotTrackerHelper.UserId}/exercise/{id}");
+            var response = await httpClient.DeleteAsync($"/api/Exercises/user/{UserId()}/exercise/{id}");
 
             return HandleApiResponse(response, () =>
             {
@@ -133,7 +136,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Routines/user/{WorkotTrackerHelper.UserId}",
+            var response = await httpClient.PostAsync($"/api/Routines/user/{UserId()}",
                                                 new StringContent(serializedRoutine, System.Text.Encoding.Unicode, "application/json"));
 
             return await HandleApiResponse(response, async () =>
@@ -156,7 +159,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PutAsync($"/api/Routines/user/{WorkotTrackerHelper.UserId}/routine/{routine.ID}",
+            var response = await httpClient.PutAsync($"/api/Routines/user/{UserId()}/routine/{routine.ID}",
                                                 new StringContent(serializedRoutine, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -173,7 +176,7 @@ namespace WT_WebMVCApp.Services
         {
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.DeleteAsync($"/api/Routines/user/{WorkotTrackerHelper.UserId}/routine/{id}");
+            var response = await httpClient.DeleteAsync($"/api/Routines/user/{UserId()}/routine/{id}");
 
             return HandleApiResponse(response, () =>
             {
@@ -192,7 +195,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Routines/user/{WorkotTrackerHelper.UserId}/routine/{exercisesModel.ID}/exercises",
+            var response = await httpClient.PostAsync($"/api/Routines/user/{UserId()}/routine/{exercisesModel.ID}/exercises",
                                                 new StringContent(serializedExercises, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -239,7 +242,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/CreateOrUpdate",
+            var response = await httpClient.PostAsync($"/api/Sessions/user/{UserId()}/CreateOrUpdate",
                                                 new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -259,7 +262,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/CreateOrUpdate",
+            var response = await httpClient.PostAsync($"/api/Sessions/user/{UserId()}/CreateOrUpdate",
                                                 new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -282,7 +285,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PutAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/session/{exercise.WorkoutSessionID}/UpdateConcreteExercisesAttributes",
+            var response = await httpClient.PutAsync($"/api/Sessions/user/{UserId()}/session/{exercise.WorkoutSessionID}/UpdateConcreteExercisesAttributes",
                                                 new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -303,7 +306,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/session/{sessionId}/DeleteConcreteExercises",
+            var response = await httpClient.PostAsync($"/api/Sessions/user/{UserId()}/session/{sessionId}/DeleteConcreteExercises",
                             new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -324,7 +327,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Sessions/user/{WorkotTrackerHelper.UserId}/session/{sessionId}/DeleteConcreteExercisesFromRoutine",
+            var response = await httpClient.PostAsync($"/api/Sessions/user/{UserId()}/session/{sessionId}/DeleteConcreteExercisesFromRoutine",
                             new StringContent(serializedRequest, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -369,7 +372,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}",
+            var response = await httpClient.PostAsync($"/api/Programs/user/{UserId()}",
                                                 new StringContent(serializedProgram, System.Text.Encoding.Unicode, "application/json"));
 
             return await HandleApiResponse(response, async () =>
@@ -392,7 +395,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PutAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{program.ID}",
+            var response = await httpClient.PutAsync($"/api/Programs/user/{UserId()}/program/{program.ID}",
                                                 new StringContent(serializedProgram, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -409,7 +412,7 @@ namespace WT_WebMVCApp.Services
         {
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.DeleteAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{id}");
+            var response = await httpClient.DeleteAsync($"/api/Programs/user/{UserId()}/program/{id}");
 
             return HandleApiResponse(response, () =>
             {
@@ -428,7 +431,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{routinesModel.ID}/routines",
+            var response = await httpClient.PostAsync($"/api/Programs/user/{UserId()}/program/{routinesModel.ID}/routines",
                                                 new StringContent(serializedRoutines, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -448,7 +451,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{routineModel.ProgramId}/updateDatesForRoutine",
+            var response = await httpClient.PostAsync($"/api/Programs/user/{UserId()}/program/{routineModel.ProgramId}/updateDatesForRoutine",
                                                 new StringContent(serializedRoutine, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -473,7 +476,7 @@ namespace WT_WebMVCApp.Services
             if (programModel.ToBeActivated == false)
                 path = "deactivate";
 
-            var response = await httpClient.PostAsync($"/api/Programs/user/{WorkotTrackerHelper.UserId}/program/{programModel.ID}/{path}",
+            var response = await httpClient.PostAsync($"/api/Programs/user/{UserId()}/program/{programModel.ID}/{path}",
                                    new StringContent(serializedProgram, System.Text.Encoding.Unicode, "application/json"));
 
             return HandleApiResponse(response, () =>
@@ -569,7 +572,7 @@ namespace WT_WebMVCApp.Services
 
             var httpClient = await _workoutTrackerHttpClient.GetClient();
 
-            var response = await httpClient.PostAsync($"/api/BodyStatistics/user/{WorkotTrackerHelper.UserId}/BodyStat",
+            var response = await httpClient.PostAsync($"/api/BodyStatistics/user/{UserId()}/BodyStat",
                                                 new StringContent(serializedStatistic, System.Text.Encoding.Unicode, "application/json"));
 
             return await HandleApiResponse(response, async () =>
@@ -648,5 +651,9 @@ namespace WT_WebMVCApp.Services
 
         #endregion
 
+        private int UserId()
+        {
+            return WorkotTrackerHelper.GetUserId(_httpContextAccessor.HttpContext.User);
+        }
     }
 }

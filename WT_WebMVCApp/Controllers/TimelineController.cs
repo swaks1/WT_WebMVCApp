@@ -27,7 +27,7 @@ namespace WT_WebMVCApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
+            var UserVM = new UserVM { ID = WorkotTrackerHelper.GetUserId(User) };
 
             var year = DateTime.Now.Year;
             var month = DateTime.Now.Month;     

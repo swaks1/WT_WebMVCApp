@@ -3,6 +3,11 @@
     <div class="container">
         <div class="text-center">
             <small>Copyright © Workout Tracker 2018</small>
+            @if (User.IsInRole("Admin"))
+            {
+                <span>---&gt; Admin &lt;---- </span>
+
+            }
         </div>
     </div>
 </footer>

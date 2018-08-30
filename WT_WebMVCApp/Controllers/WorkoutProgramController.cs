@@ -30,7 +30,7 @@ namespace WT_WebMVCApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
+            var UserVM = new UserVM { ID = WorkotTrackerHelper.GetUserId(User) };
 
             var response = await _workoutTrackerService.GetProgramsForUser(UserVM);
             //set image path relative to api's URL ... 
@@ -113,7 +113,7 @@ namespace WT_WebMVCApp.Controllers
         {
             var routineIds = JsonConvert.DeserializeObject<List<int>>(routinesModel.SerializedRoutineIds);
             routinesModel.Routines = new List<WorkoutRoutineVM>();
-            foreach(var routineId in routineIds)
+            foreach (var routineId in routineIds)
             {
                 var wr = new WorkoutRoutineVM();
                 wr.ID = routineId;

@@ -28,7 +28,7 @@ namespace WT_WebMVCApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
+            var UserVM = new UserVM { ID = WorkotTrackerHelper.GetUserId(User) };
             var routineResponse = await _workoutTrackerService.GetRoutinesForUser(UserVM);
 
             //set image path relative to api's URL ... 

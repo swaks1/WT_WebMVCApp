@@ -10,9 +10,14 @@ using WT_WebMVCApp.Helpers;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.AspNetCore.Authentication;
+using System.Diagnostics;
 
 namespace WT_WebMVCApp.Controllers
 {
+    [Authorize]
     public class WorkoutExerciseController : Controller
     {
         private readonly ILogger<WorkoutSessionController> _logger;
@@ -27,8 +32,16 @@ namespace WT_WebMVCApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var UserVM = new UserVM { ID = WorkotTrackerHelper.UserId };
+            await WriteOutIdentityInformation();
+
+            var UserVM = new UserVM { ID = WorkotTrackerHelper.GetUserId(User) };
             var response = await _workoutTrackerService.GetExercisesForUser(UserVM);
+
+            if(response.ResponseMessage == "AccessDenied" || response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                return RedirectToAction("AccessDenied", "Home");
+            }
+
             //set image path relative to api's URL ... 
             response.ViewModel.ForEach(item => item.ImagePath = WorkotTrackerHelper.ApiUrl + item.ImagePath);
 
@@ -95,8 +108,6 @@ namespace WT_WebMVCApp.Controllers
             return Json(response);
         }
 
-        
-
         private SelectList GetCategorySelectList()
         {
             var enumData = Enum.GetValues(typeof(Category)).OfType<Enum>()
@@ -109,6 +120,22 @@ namespace WT_WebMVCApp.Controllers
 
 
             return selectList;
+        }
+
+
+        public async Task WriteOutIdentityInformation()
+        {
+            // get the saved identity token
+            var identityToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+
+            // write it out
+            Debug.WriteLine($"Identity token: {identityToken}");
+
+            // write out the user claims
+            foreach (var claim in User.Claims)
+            {
+                Debug.WriteLine($"Claim type: {claim.Type} - Claim value: {claim.Value}");
+            }
         }
     }
 }
